@@ -57,6 +57,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const createLead = useMutation(api.leads.createLead);
   const updateLead = useMutation(api.leads.updateLead);
@@ -68,6 +69,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
 
   useEffect(() => {
     scrollToBottom();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -87,6 +91,42 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       setIsTyping(false);
       addMessage("bot", text, options);
     }, 1500);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+
+    switch (step) {
+      case "whatsapp":
+        value = value
+          .replace(/\D/g, "")
+          .slice(0, 11)
+          .replace(/^(\d{2})(\d)/g, "($1) $2")
+          .replace(/(\d{4,5})(\d{4})/, "$1-$2");
+        break;
+      case "numero_cnpj":
+        value = value
+          .replace(/\D/g, '')
+          .slice(0, 14)
+          .replace(/(\d{2})(\d)/, '$1.$2')
+          .replace(/(\d{3})(\d)/, '$1.$2')
+          .replace(/(\d{3})(\d)/, '$1/$2')
+          .replace(/(\d{4})(\d)/, '$1-$2');
+        break;
+      case "valor_plano":
+        value = value.replace(/\D/g, '');
+        if (value) {
+          const numberValue = parseInt(value, 10) / 100;
+          value = new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          }).format(numberValue);
+        } else {
+          value = '';
+        }
+        break;
+    }
+    setInput(value);
   };
 
   const getNextStep = (currentStep: ChatStep, data: Partial<ChatData>): ChatStep => {
@@ -179,39 +219,13 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     }
   };
 
-  const formatInput = (step: ChatStep, value: string): string => {
-    switch (step) {
-      case "whatsapp":
-        const cleanPhone = value.replace(/\D/g, '');
-        if (cleanPhone.length <= 11) {
-          return cleanPhone.replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3');
-        }
-        return value;
-      case "numero_cnpj":
-        const cleanCnpj = value.replace(/\D/g, '');
-        if (cleanCnpj.length <= 14) {
-          return cleanCnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-        }
-        return value;
-      case "valor_plano":
-        const cleanValue = value.replace(/\D/g, '');
-        if (cleanValue) {
-          const numValue = parseInt(cleanValue) / 100;
-          return `R$ ${numValue.toFixed(2).replace('.', ',')}`;
-        }
-        return value;
-      default:
-        return value;
-    }
-  };
-
   const getInputPlaceholder = (step: ChatStep): string => {
     switch (step) {
       case "nome": return "Digite seu nome completo...";
       case "whatsapp": return "(11) 99999-9999";
       case "email": return "seu@email.com";
       case "numero_cnpj": return "00.000.000/0000-00";
-      case "valor_plano": return "R$ 350,00";
+      case "valor_plano": return "R$ 0,00";
       default: return "Digite sua resposta...";
     }
   };
@@ -242,7 +256,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         newData.nome = value;
         break;
       case "whatsapp":
-        newData.whatsapp = formatInput(step, value);
+        newData.whatsapp = value;
         break;
       case "email":
         newData.email = value;
@@ -254,7 +268,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         newData.enquadramentoCnpj = value;
         break;
       case "numero_cnpj":
-        newData.numeroCnpj = formatInput(step, value);
+        newData.numeroCnpj = value;
         break;
       case "funcionarios":
         newData.temFuncionarios = value.toLowerCase() === "sim";
@@ -266,7 +280,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         newData.nomePlanoAtual = value;
         break;
       case "valor_plano":
-        newData.valorPlanoAtual = formatInput(step, value);
+        newData.valorPlanoAtual = value;
         break;
       case "dificuldade":
         newData.maiorDificuldade = value;
@@ -277,7 +291,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
 
     // Criar ou atualizar lead no banco
     try {
-      if (step === "email" && newData.nome && newData.whatsapp && newData.email) {
+      if (step === "cnpj" && newData.nome && newData.whatsapp && newData.email) {
         const id = await createLead({
           nome: newData.nome,
           whatsapp: newData.whatsapp,
@@ -443,15 +457,22 @@ export default function Chatbot({ onClose }: ChatbotProps) {
 
         {/* Input */}
         {step !== "finalizado" && !isTyping && (
-          <form onSubmit={handleSubmit} className="p-4 border-t bg-white rounded-b-2xl">
-            <div className="flex gap-2">
+          <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-200">
+            <div className="relative">
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={handleInputChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    handleSubmit(e as any);
+                  }
+                }}
                 placeholder={getInputPlaceholder(step)}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-unimed-green focus:border-transparent text-sm"
-                autoFocus
+                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-unimed-green-300 transition-shadow"
+                disabled={isTyping}
+                maxLength={step === 'numero_cnpj' ? 18 : undefined}
               />
               <button
                 type="submit"
