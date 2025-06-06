@@ -34,8 +34,9 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-unimed-green to-green-700 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-[url('../../hospital-unimed-recife.jpg')] bg-cover bg-center bg-no-repeat relative text-white py-20">
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6">
