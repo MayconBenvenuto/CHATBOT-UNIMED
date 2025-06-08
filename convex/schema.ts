@@ -16,6 +16,11 @@ const applicationTables = {
     valorPlanoAtual: v.optional(v.string()),
     maiorDificuldade: v.optional(v.string()),
     status: v.string(), // "em_andamento", "completo", "enviado"
+    
+    // --- MUDANÇA AQUI ---
+    // Adicionamos um campo para armazenar os dados da empresa validados pela API.
+    // Usamos v.any() por simplicidade, pois a resposta da API pode ter muitos campos.
+    dadosEmpresa: v.optional(v.any()),
   }),
 };
 

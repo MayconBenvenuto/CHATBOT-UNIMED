@@ -27,6 +27,9 @@ export const updateLead = mutation({
     valorPlanoAtual: v.optional(v.string()),
     maiorDificuldade: v.optional(v.string()),
     status: v.optional(v.string()),
+    // --- MUDANÇA AQUI ---
+    // Permitimos que a função de update receba os dados da empresa.
+    dadosEmpresa: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
     const { leadId, ...updates } = args;
