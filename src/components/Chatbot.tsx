@@ -374,6 +374,8 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           maiorDificuldade: newData.maiorDificuldade,
           status: "completo",
         });
+        // Aguarda alguns milissegundos para garantir persistência antes do e-mail
+        await new Promise(resolve => setTimeout(resolve, 500));
         await sendEmail({ leadId: currentLeadId });
         toast.success("✅ Informações enviadas! Em breve nosso consultor entrará em contato.");
       } catch (error) {
