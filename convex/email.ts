@@ -35,7 +35,6 @@ export const sendLeadEmail = action({
       try {
         const cleanedCnpj = lead.numeroCnpj.replace(/\D/g, "");
         const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanedCnpj}`);
-        
         if (response.ok) {
           dadosEmpresa = await response.json();
           // Salva os dados da empresa no banco para futuras consultas
@@ -43,24 +42,31 @@ export const sendLeadEmail = action({
             leadId: args.leadId,
             dadosEmpresa: dadosEmpresa,
           });
-
-          // Formata a seção de HTML com os dados da empresa
-          dadosEmpresaHtml = `
-            <div class="section">
-              <h3>🏢 Dados da Empresa (Validados)</h3>
-              <div class="info-item"><strong>Razão Social:</strong> ${dadosEmpresa.razao_social || 'N/A'}</div>
-              <div class="info-item"><strong>Nome Fantasia:</strong> ${dadosEmpresa.nome_fantasia || 'N/A'}</div>
-              <div class="info-item"><strong>Situação Cadastral:</strong> ${dadosEmpresa.descricao_situacao_cadastral || 'N/A'}</div>
-              <div class="info-item"><strong>Atividade Principal:</strong> ${dadosEmpresa.cnae_fiscal_descricao || 'N/A'}</div>
-              <div class="info-item"><strong>Endereço:</strong> ${dadosEmpresa.logradouro || ''}, ${dadosEmpresa.numero || ''}, ${dadosEmpresa.bairro || ''} - ${dadosEmpresa.municipio || ''}/${dadosEmpresa.uf || ''}</div>
-              <div class="info-item"><strong>CEP:</strong> ${dadosEmpresa.cep || 'N/A'}</div>
-              <div class="info-item"><strong>Data de Abertura:</strong> ${dadosEmpresa.data_inicio_atividade || 'N/A'}</div>
-            </div>
-          `;
+        } else if (lead.dadosEmpresa) {
+          // Fallback: usa os dados já salvos no lead
+          dadosEmpresa = lead.dadosEmpresa;
         }
       } catch (error) {
         console.error("Falha ao buscar dados do CNPJ na BrasilAPI:", error);
-        // A falha na API não impede o envio do e-mail; ele apenas não será enriquecido.
+        // Fallback: usa os dados já salvos no lead
+        if (lead.dadosEmpresa) {
+          dadosEmpresa = lead.dadosEmpresa;
+        }
+      }
+      // Monta o HTML se houver dados da empresa
+      if (dadosEmpresa) {
+        dadosEmpresaHtml = `
+          <div class="section">
+            <h3>🏢 Dados da Empresa (Validados)</h3>
+            <div class="info-item"><strong>Razão Social:</strong> ${dadosEmpresa.razao_social || 'N/A'}</div>
+            <div class="info-item"><strong>Nome Fantasia:</strong> ${dadosEmpresa.nome_fantasia || 'N/A'}</div>
+            <div class="info-item"><strong>Situação Cadastral:</strong> ${dadosEmpresa.descricao_situacao_cadastral || 'N/A'}</div>
+            <div class="info-item"><strong>Atividade Principal:</strong> ${dadosEmpresa.cnae_fiscal_descricao || 'N/A'}</div>
+            <div class="info-item"><strong>Endereço:</strong> ${dadosEmpresa.logradouro || ''}, ${dadosEmpresa.numero || ''}, ${dadosEmpresa.bairro || ''} - ${dadosEmpresa.municipio || ''}/${dadosEmpresa.uf || ''}</div>
+            <div class="info-item"><strong>CEP:</strong> ${dadosEmpresa.cep || 'N/A'}</div>
+            <div class="info-item"><strong>Data de Abertura:</strong> ${dadosEmpresa.data_inicio_atividade || 'N/A'}</div>
+          </div>
+        `;
       }
     }
 
