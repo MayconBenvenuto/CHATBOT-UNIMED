@@ -1,17 +1,19 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useReducer } from "react";
 import { useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { X, MessageCircle, Send, CheckCircle, Phone, Mail, Building, Users, Heart } from "lucide-react";
+import { X, Heart, Send, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "../../convex/_generated/dataModel";
+
+// --- INTERFACES E TIPOS (MOVIMOS PARA CIMA PARA ORGANIZAÇÃO) ---
 
 interface ChatbotProps {
   onClose: () => void;
 }
 
-type ChatStep = 
+type ChatStep =
   | "nome"
-  | "whatsapp" 
+  | "whatsapp"
   | "email"
   | "cnpj"
   | "enquadramento"
@@ -39,21 +41,66 @@ interface Message {
   type: "user" | "bot";
   text: string;
   options?: string[];
-  isTyping?: boolean;
 }
 
-export default function Chatbot({ onClose }: ChatbotProps) {
-  const [step, setStep] = useState<ChatStep>("nome");
-  const [input, setInput] = useState("");
-  const [leadId, setLeadId] = useState<Id<"leads"> | null>(null);
-  const [chatData, setChatData] = useState<Partial<ChatData>>({});
-  const [messages, setMessages] = useState<Message[]>([
+// --- LÓGICA DO REDUCER PARA GERENCIAMENTO DE ESTADO ---
+
+interface ChatState {
+  step: ChatStep;
+  input: string;
+  leadId: Id<"leads"> | null;
+  chatData: Partial<ChatData>;
+  messages: Message[];
+  isTyping: boolean;
+}
+
+type ChatAction =
+  | { type: "SET_INPUT"; payload: string }
+  | { type: "SET_IS_TYPING"; payload: boolean }
+  | { type: "ADD_MESSAGE"; payload: Message }
+  | { type: "SET_LEAD_ID"; payload: Id<"leads"> }
+  | { type: "PROCEED_STEP"; payload: { nextStep: ChatStep; newData: Partial<ChatData> } };
+
+const initialState: ChatState = {
+  step: "nome",
+  input: "",
+  leadId: null,
+  chatData: {},
+  messages: [
     {
       type: "bot",
       text: "👋 Olá! Sou o Davi, assistente virtual da Unimed. Vou te ajudar a encontrar o melhor plano PME para sua empresa!",
-    }
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
+    },
+  ],
+  isTyping: false,
+};
+
+function chatReducer(state: ChatState, action: ChatAction): ChatState {
+  switch (action.type) {
+    case "SET_INPUT":
+      return { ...state, input: action.payload };
+    case "SET_IS_TYPING":
+      return { ...state, isTyping: action.payload };
+    case "ADD_MESSAGE":
+      return { ...state, messages: [...state.messages, action.payload] };
+    case "SET_LEAD_ID":
+      return { ...state, leadId: action.payload };
+    case "PROCEED_STEP":
+      return {
+        ...state,
+        step: action.payload.nextStep,
+        chatData: action.payload.newData,
+        input: "", // Limpa o input a cada passo
+      };
+    default:
+      return state;
+  }
+}
+
+export default function Chatbot({ onClose }: ChatbotProps) {
+  const [state, dispatch] = useReducer(chatReducer, initialState);
+  const { step, input, leadId, chatData, messages, isTyping } = state;
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -72,24 +119,20 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     }
   }, [messages]);
 
+  const addBotMessage = (text: string, options?: string[]) => {
+    dispatch({ type: "SET_IS_TYPING", payload: true });
+    setTimeout(() => {
+      dispatch({ type: "SET_IS_TYPING", payload: false });
+      dispatch({ type: "ADD_MESSAGE", payload: { type: "bot", text, options } });
+    }, 1500);
+  };
+  
   useEffect(() => {
     // Iniciar conversa após um pequeno delay
     setTimeout(() => {
       addBotMessage("Para começar, qual é o seu nome? 😊");
     }, 1000);
   }, []);
-
-  const addMessage = (type: "user" | "bot", text: string, options?: string[]) => {
-    setMessages(prev => [...prev, { type, text, options }]);
-  };
-
-  const addBotMessage = (text: string, options?: string[]) => {
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      addMessage("bot", text, options);
-    }, 1500);
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
@@ -104,27 +147,27 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         break;
       case "numero_cnpj":
         value = value
-          .replace(/\D/g, '')
+          .replace(/\D/g, "")
           .slice(0, 14)
-          .replace(/(\d{2})(\d)/, '$1.$2')
-          .replace(/(\d{3})(\d)/, '$1.$2')
-          .replace(/(\d{3})(\d)/, '$1/$2')
-          .replace(/(\d{4})(\d)/, '$1-$2');
+          .replace(/(\d{2})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d)/, "$1/$2")
+          .replace(/(\d{4})(\d)/, "$1-$2");
         break;
       case "valor_plano":
-        value = value.replace(/\D/g, '');
+        value = value.replace(/\D/g, "");
         if (value) {
           const numberValue = parseInt(value, 10) / 100;
-          value = new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
+          value = new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
           }).format(numberValue);
         } else {
-          value = '';
+          value = "";
         }
         break;
     }
-    setInput(value);
+    dispatch({ type: "SET_INPUT", payload: value });
   };
 
   const getNextStep = (currentStep: ChatStep, data: Partial<ChatData>): ChatStep => {
@@ -144,14 +187,14 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   };
 
   const getBotMessage = (step: ChatStep, data: Partial<ChatData>): { text: string; options?: string[] } => {
-    switch (step) {
+        switch (step) {
       case "whatsapp": 
         return { text: `Perfeito, ${data.nome}! 📱 Agora preciso do seu WhatsApp para nosso consultor entrar em contato:` };
       case "email": 
         return { text: "Ótimo! 📧 Qual é o seu e-mail?" };
       case "cnpj": 
         return { 
-          text: "🏢 Sua empresa possui CNPJ?", 
+          text: "🏢 Você possui CNPJ?", 
           options: ["Sim", "Não"] 
         };
       case "enquadramento": 
@@ -163,19 +206,19 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         return { text: "🔢 Qual é o número do CNPJ da sua empresa?" };
       case "plano_atual": 
         return { 
-          text: "🏥 Vocês já possuem algum plano de saúde atualmente?", 
+          text: "🏥 Você já possuem algum plano de saúde atualmente?", 
           options: ["Sim", "Não"] 
         };
       case "nome_plano": 
         return { 
-          text: "📝 Qual é o nome do plano de saúde atual?",
+          text: "📝 Qual é o seu plano de saúde atual?",
           options: ["Bradesco Saúde", "SulAmérica", "Amil", "NotreDame", "Hapvida", "Outro"]
         };
       case "valor_plano": 
-        return { text: "💰 Quanto vocês pagam mensalmente pelo plano atual? (Ex: R$ 350,00)" };
+        return { text: "💰 Quanto você paga mensalmente pelo plano atual? (Ex: R$ 350,00)" };
       case "dificuldade": 
         return { 
-          text: "🤔 Qual é a maior dificuldade que vocês enfrentam com planos de saúde?",
+          text: "🤔 Qual é a maior dificuldade que você enfrenta com planos de saúde?",
           options: [
             "Alto custo",
             "Rede médica limitada", 
@@ -197,12 +240,12 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       case "nome":
         return value.trim().length >= 2;
       case "whatsapp":
-        const cleanPhone = value.replace(/\D/g, '');
+        const cleanPhone = value.replace(/\D/g, "");
         return cleanPhone.length >= 10 && cleanPhone.length <= 11;
       case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
       case "numero_cnpj":
-        const cleanCnpj = value.replace(/\D/g, '');
+        const cleanCnpj = value.replace(/\D/g, "");
         return cleanCnpj.length === 14;
       case "valor_plano":
         return /\d+/.test(value);
@@ -213,23 +256,23 @@ export default function Chatbot({ onClose }: ChatbotProps) {
 
   const getInputPlaceholder = (step: ChatStep): string => {
     switch (step) {
-      case "nome": return "Digite seu nome completo...";
-      case "whatsapp": return "(11) 99999-9999";
-      case "email": return "seu@email.com";
-      case "numero_cnpj": return "00.000.000/0000-00";
-      case "valor_plano": return "R$ 0,00";
-      default: return "Digite sua resposta...";
+        case "nome": return "Digite seu nome completo...";
+        case "whatsapp": return "(11) 99999-9999";
+        case "email": return "seu@email.com";
+        case "numero_cnpj": return "00.000.000/0000-00";
+        case "valor_plano": return "R$ 0,00";
+        default: return "Digite sua resposta...";
     }
   };
 
   const handleOptionClick = (option: string) => {
-    setInput(option);
+    dispatch({ type: "SET_INPUT", payload: option });
     setTimeout(() => handleSubmit(null, option), 100);
   };
 
   const handleSubmit = async (e: React.FormEvent | null, optionValue?: string) => {
     if (e) e.preventDefault();
-    
+
     const value = optionValue || input;
     if (!value.trim()) return;
 
@@ -238,47 +281,29 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       return;
     }
 
-    addMessage("user", value);
+    dispatch({ type: "ADD_MESSAGE", payload: { type: "user", text: value } });
 
     const newData = { ...chatData };
 
-    // Processar a entrada baseada no step atual
     switch (step) {
-      case "nome":
-        newData.nome = value;
-        break;
-      case "whatsapp":
-        newData.whatsapp = value;
-        break;
-      case "email":
-        newData.email = value;
-        break;
-      case "cnpj":
-        newData.temCnpj = value.toLowerCase() === "sim";
-        break;
-      case "enquadramento":
-        newData.enquadramentoCnpj = value;
-        break;
-      case "numero_cnpj":
-        newData.numeroCnpj = value;
-        break;
-      case "plano_atual":
-        newData.temPlanoAtual = value.toLowerCase() === "sim";
-        break;
-      case "nome_plano":
-        newData.nomePlanoAtual = value;
-        break;
-      case "valor_plano":
-        newData.valorPlanoAtual = value;
-        break;
-      case "dificuldade":
-        newData.maiorDificuldade = value;
-        break;
+      case "nome": newData.nome = value; break;
+      case "whatsapp": newData.whatsapp = value; break;
+      case "email": newData.email = value; break;
+      case "cnpj": newData.temCnpj = value.toLowerCase() === "sim"; break;
+      case "enquadramento": newData.enquadramentoCnpj = value; break;
+      case "numero_cnpj": newData.numeroCnpj = value; break;
+      case "plano_atual": newData.temPlanoAtual = value.toLowerCase() === "sim"; break;
+      case "nome_plano": newData.nomePlanoAtual = value; break;
+      case "valor_plano": newData.valorPlanoAtual = value; break;
+      case "dificuldade": newData.maiorDificuldade = value; break;
     }
 
-    setChatData(newData);
+    const nextStep = getNextStep(step, newData);
 
-    // Criar ou atualizar lead no banco
+    dispatch({ type: "PROCEED_STEP", payload: { nextStep, newData } });
+
+    // Salvar no banco
+    let currentLeadId = leadId;
     try {
       if (step === "cnpj" && newData.nome && newData.whatsapp && newData.email) {
         const id = await createLead({
@@ -287,7 +312,8 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           email: newData.email,
           temCnpj: newData.temCnpj || false,
         });
-        setLeadId(id);
+        dispatch({ type: "SET_LEAD_ID", payload: id });
+        currentLeadId = id; // Atualiza o ID para o envio de e-mail na mesma passada
       } else if (leadId) {
         await updateLead({
           leadId,
@@ -302,25 +328,23 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       }
     } catch (error) {
       console.error("Erro ao salvar lead:", error);
+      toast.error("Houve um problema ao salvar suas informações.");
     }
 
-    const nextStep = getNextStep(step, newData);
-    setStep(nextStep);
-
     // Enviar e-mail quando finalizado
-    if (nextStep === "finalizado" && leadId) {
+    if (nextStep === "finalizado" && currentLeadId) {
       try {
-        await sendEmail({ leadId });
-        toast.success("✅ Informações enviadas! Em breve um de nossos consultores entrará em contato com você!");
+        await sendEmail({ leadId: currentLeadId });
+        toast.success("✅ Informações enviadas! Em breve nosso consultor entrará em contato.");
       } catch (error) {
-        
+        // !!! MELHORIA APLICADA !!!
+        console.error("Falha ao enviar e-mail de notificação:", error);
+        toast.error("❌ Ops! Seus dados foram salvos, mas não conseguimos notificar nosso time. Entraremos em contato assim que possível!");
       }
     }
 
     const botResponse = getBotMessage(nextStep, newData);
     addBotMessage(botResponse.text, botResponse.options);
-
-    setInput("");
   };
 
   const getStepIcon = (step: ChatStep) => {
@@ -365,6 +389,8 @@ export default function Chatbot({ onClose }: ChatbotProps) {
             <button
               onClick={onClose}
               className="text-white hover:text-gray-200 transition-colors p-1"
+              // !!! MELHORIA DE ACESSIBILIDADE APLICADA !!!
+              aria-label="Fechar chatbot"
             >
               <X className="w-6 h-6" />
             </button>
@@ -402,7 +428,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
                 >
                   <p className="text-sm leading-relaxed">{message.text}</p>
                   
-                  {/* Options Buttons */}
                   {message.options && message.type === "bot" && (
                     <div className="mt-3 space-y-2">
                       {message.options.map((option, optIndex) => (
@@ -421,7 +446,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
             </div>
           ))}
           
-          {/* Typing Indicator */}
           {isTyping && (
             <div className="flex justify-start">
               <div className="flex items-start space-x-2">
@@ -444,8 +468,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
 
         {/* Input */}
         {step !== "finalizado" && !isTyping && (
-          <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-200">
-            <div className="relative">
+          <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-200 relative">
               <input
                 ref={inputRef}
                 type="text"
@@ -457,18 +480,19 @@ export default function Chatbot({ onClose }: ChatbotProps) {
                   }
                 }}
                 placeholder={getInputPlaceholder(step)}
-                className="w-full pl-4 pr-12 py-2 sm:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-unimed-green-300 transition-shadow text-sm sm:text-base"
+                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-unimed-green transition-shadow text-sm"
                 disabled={isTyping}
                 maxLength={step === 'numero_cnpj' ? 18 : undefined}
               />
               <button
                 type="submit"
                 disabled={!input.trim()}
-                className="bg-unimed-green text-white p-2 sm:p-3 rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-5 top-1/2 -translate-y-1/2 bg-unimed-green text-white p-2 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                // !!! MELHORIA DE ACESSIBILIDADE APLICADA !!!
+                aria-label="Enviar mensagem"
               >
                 <Send className="w-5 h-5" />
               </button>
-            </div>
           </form>
         )}
 
