@@ -363,6 +363,17 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     
     if (nextStep === "finalizado" && currentLeadId) {
       try {
+        // Garante que todos os dados estejam salvos antes de enviar o e-mail
+        await updateLead({
+          leadId: currentLeadId,
+          enquadramentoCnpj: newData.enquadramentoCnpj,
+          numeroCnpj: newData.numeroCnpj,
+          temPlanoAtual: newData.temPlanoAtual,
+          nomePlanoAtual: newData.nomePlanoAtual,
+          valorPlanoAtual: newData.valorPlanoAtual,
+          maiorDificuldade: newData.maiorDificuldade,
+          status: "completo",
+        });
         await sendEmail({ leadId: currentLeadId });
         toast.success("✅ Informações enviadas! Em breve nosso consultor entrará em contato.");
       } catch (error) {
