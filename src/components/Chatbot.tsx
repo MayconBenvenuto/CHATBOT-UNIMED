@@ -363,6 +363,22 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     
     if (nextStep === "finalizado" && currentLeadId) {
       try {
+        // Busca e salva os dados da empresa ANTES de enviar o e-mail
+        if (newData.numeroCnpj) {
+          const cleanedCnpj = newData.numeroCnpj.replace(/\D/g, "");
+          try {
+            const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanedCnpj}`);
+            if (response.ok) {
+              const dadosEmpresa = await response.json();
+              await updateLead({
+                leadId: currentLeadId,
+                dadosEmpresa,
+              });
+            }
+          } catch (err) {
+            // Não bloqueia o fluxo se a API falhar
+          }
+        }
         // Garante que todos os dados estejam salvos antes de enviar o e-mail
         await updateLead({
           leadId: currentLeadId,
@@ -374,7 +390,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           maiorDificuldade: newData.maiorDificuldade,
           status: "completo",
         });
-        // Aguarda alguns milissegundos para garantir persistência antes do e-mail
         await new Promise(resolve => setTimeout(resolve, 500));
         await sendEmail({ leadId: currentLeadId });
         toast.success("✅ Informações enviadas! Em breve nosso consultor entrará em contato.");
