@@ -97,7 +97,6 @@ export const sendLeadEmail = action({
               <div class="info-item"><strong>Possui CNPJ:</strong> ${lead.temCnpj ? '✅ SIM' : '❌ NÃO'}</div>
               ${lead.enquadramentoCnpj ? `<div class="info-item"><strong>Enquadramento:</strong> ${lead.enquadramentoCnpj}</div>` : ''}
               ${lead.numeroCnpj ? `<div class="info-item"><strong>CNPJ:</strong> ${lead.numeroCnpj}</div>` : ''}
-              ${lead.temFuncionarios !== undefined ? `<div class="info-item"><strong>Funcionários:</strong> ${lead.temFuncionarios ? '✅ SIM' : '❌ NÃO'}</div>` : ''}
             </div>
             
             <div class="section">
@@ -114,7 +113,6 @@ export const sendLeadEmail = action({
               <h4>💡 Perfil do Lead:</h4>
               <ul>
                 ${lead.temCnpj ? '<li>✅ <strong>Empresa formalizada</strong> - Pode contratar plano empresarial</li>' : '<li>⚠️ <strong>Empresa não formalizada</strong> - Focar em MEI ou plano familiar</li>'}
-                ${lead.temFuncionarios ? '<li>👥 <strong>Possui funcionários</strong> - Necessita plano coletivo empresarial</li>' : '<li>👤 <strong>Sem funcionários</strong> - Plano individual ou familiar</li>'}
                 ${lead.temPlanoAtual ? '<li>🔄 <strong>Já possui plano</strong> - Oportunidade de migração/economia</li>' : '<li>🆕 <strong>Não possui plano</strong> - Cliente novo, educar sobre benefícios</li>'}
               </ul>
               

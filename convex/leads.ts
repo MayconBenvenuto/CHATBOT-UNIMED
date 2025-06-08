@@ -22,7 +22,6 @@ export const updateLead = mutation({
     leadId: v.id("leads"),
     enquadramentoCnpj: v.optional(v.string()),
     numeroCnpj: v.optional(v.string()),
-    temFuncionarios: v.optional(v.boolean()),
     temPlanoAtual: v.optional(v.boolean()),
     nomePlanoAtual: v.optional(v.string()),
     valorPlanoAtual: v.optional(v.string()),

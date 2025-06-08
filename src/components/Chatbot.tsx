@@ -16,7 +16,6 @@ type ChatStep =
   | "cnpj"
   | "enquadramento"
   | "numero_cnpj"
-  | "funcionarios"
   | "plano_atual"
   | "nome_plano"
   | "valor_plano"
@@ -30,7 +29,6 @@ interface ChatData {
   temCnpj: boolean;
   enquadramentoCnpj: string;
   numeroCnpj: string;
-  temFuncionarios: boolean;
   temPlanoAtual: boolean;
   nomePlanoAtual: string;
   valorPlanoAtual: string;
@@ -52,7 +50,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       type: "bot",
-      text: "👋 Olá! Sou a Ana, assistente virtual da Unimed. Vou te ajudar a encontrar o melhor plano PME para sua empresa!",
+      text: "👋 Olá! Sou o Davi, assistente virtual da Unimed. Vou te ajudar a encontrar o melhor plano PME para sua empresa!",
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -134,10 +132,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       case "nome": return "whatsapp";
       case "whatsapp": return "email";
       case "email": return "cnpj";
-      case "cnpj": return data.temCnpj ? "enquadramento" : "funcionarios";
+      case "cnpj": return data.temCnpj ? "enquadramento" : "plano_atual";
       case "enquadramento": return "numero_cnpj";
-      case "numero_cnpj": return "funcionarios";
-      case "funcionarios": return "plano_atual";
+      case "numero_cnpj": return "plano_atual";
       case "plano_atual": return data.temPlanoAtual ? "nome_plano" : "dificuldade";
       case "nome_plano": return "valor_plano";
       case "valor_plano": return "dificuldade";
@@ -164,11 +161,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         };
       case "numero_cnpj": 
         return { text: "🔢 Qual é o número do CNPJ da sua empresa?" };
-      case "funcionarios": 
-        return { 
-          text: "👥 Sua empresa possui funcionários?", 
-          options: ["Sim", "Não"] 
-        };
       case "plano_atual": 
         return { 
           text: "🏥 Vocês já possuem algum plano de saúde atualmente?", 
@@ -185,7 +177,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         return { 
           text: "🤔 Qual é a maior dificuldade que vocês enfrentam com planos de saúde?",
           options: [
-            "Preço muito alto",
+            "Alto custo",
             "Rede médica limitada", 
             "Demora no atendimento",
             "Cobertura insuficiente",
@@ -270,9 +262,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       case "numero_cnpj":
         newData.numeroCnpj = value;
         break;
-      case "funcionarios":
-        newData.temFuncionarios = value.toLowerCase() === "sim";
-        break;
       case "plano_atual":
         newData.temPlanoAtual = value.toLowerCase() === "sim";
         break;
@@ -304,7 +293,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           leadId,
           enquadramentoCnpj: newData.enquadramentoCnpj,
           numeroCnpj: newData.numeroCnpj,
-          temFuncionarios: newData.temFuncionarios,
           temPlanoAtual: newData.temPlanoAtual,
           nomePlanoAtual: newData.nomePlanoAtual,
           valorPlanoAtual: newData.valorPlanoAtual,
@@ -323,10 +311,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     if (nextStep === "finalizado" && leadId) {
       try {
         await sendEmail({ leadId });
-        toast.success("✅ Informações enviadas! Verifique seu e-mail.");
+        toast.success("✅ Informações enviadas! Em breve um de nossos consultores entrará em contato com você!");
       } catch (error) {
-        console.error("Erro ao enviar e-mail:", error);
-        toast.error("Erro ao enviar informações. Tente novamente.");
+        
       }
     }
 
@@ -344,7 +331,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       case "cnpj": return "🏢";
       case "enquadramento": return "📋";
       case "numero_cnpj": return "🔢";
-      case "funcionarios": return "👥";
       case "plano_atual": return "🏥";
       case "nome_plano": return "📝";
       case "valor_plano": return "💰";
@@ -355,7 +341,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   };
 
   const getProgressPercentage = () => {
-    const steps = ["nome", "whatsapp", "email", "cnpj", "enquadramento", "numero_cnpj", "funcionarios", "plano_atual", "nome_plano", "valor_plano", "dificuldade", "finalizado"];
+    const steps = ["nome", "whatsapp", "email", "cnpj", "enquadramento", "numero_cnpj", "plano_atual", "nome_plano", "valor_plano", "dificuldade", "finalizado"];
     const currentIndex = steps.indexOf(step);
     return Math.round((currentIndex / (steps.length - 1)) * 100);
   };
