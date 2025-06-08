@@ -12,10 +12,8 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-unimed-green rounded-full flex items-center justify-center">
-                <Heart className="w-5 h-5 text-white" />
-              </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">Unimed</span>
+              <img src="/logo-unimed.png" alt="Logo Unimed" className="w-[15em] h-[7em] object-contain" />
+              <span className="ml-2 text-xl font-bold text-gray-900">Planos de Saúde PME</span>
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#beneficios" className="text-gray-700 hover:text-unimed-green">Benefícios</a>
@@ -54,7 +52,10 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                 >
                   Solicitar Cotação Gratuita
                 </button>
-                <button className="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white hover:text-unimed-green transition-colors font-semibold">
+                <button
+                  onClick={onOpenChatbot}
+                  className="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white hover:text-unimed-green transition-colors font-semibold"
+                >
                   Saiba Mais
                 </button>
               </div>

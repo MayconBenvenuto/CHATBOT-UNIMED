@@ -348,7 +348,8 @@ export default function Chatbot({ onClose }: ChatbotProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md h-[700px] flex flex-col shadow-2xl">
+      <div className="bg-white rounded-2xl w-full max-w-xs sm:max-w-sm md:max-w-md h-[70vh] max-h-[90vh] flex flex-col shadow-2xl fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 transition-all duration-300"
+        style={{width: '100%', maxWidth: '350px'}}>
         {/* Header */}
         <div className="bg-gradient-to-r from-unimed-green to-green-600 text-white p-4 rounded-t-2xl">
           <div className="flex items-center justify-between mb-3">
@@ -357,7 +358,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold">Ana - Assistente Unimed</h3>
+                <h3 className="font-semibold">Davi - Assistente Unimed</h3>
                 <p className="text-sm text-green-100">Online agora</p>
               </div>
             </div>
@@ -380,7 +381,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4 bg-gray-50">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -456,14 +457,14 @@ export default function Chatbot({ onClose }: ChatbotProps) {
                   }
                 }}
                 placeholder={getInputPlaceholder(step)}
-                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-unimed-green-300 transition-shadow"
+                className="w-full pl-4 pr-12 py-2 sm:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-unimed-green-300 transition-shadow text-sm sm:text-base"
                 disabled={isTyping}
                 maxLength={step === 'numero_cnpj' ? 18 : undefined}
               />
               <button
                 type="submit"
                 disabled={!input.trim()}
-                className="bg-unimed-green text-white p-3 rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-unimed-green text-white p-2 sm:p-3 rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-5 h-5" />
               </button>
