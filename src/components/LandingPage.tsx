@@ -310,10 +310,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center mb-6">
-                <div className="w-13 h-13 bg-unimed-green rounded-full flex items-center justify-center">
-                  <img src="/logo-unimed.png" alt="Logo Unimed" className="w-[15em] h-[7em] object-contain" />
-                  <Heart className="w-5 h-5 text-white" />
-                </div>
+                <img src="/logo-unimed.png" alt="Logo Unimed" className="w-[7em] h-[7em] object-contain" />
                 <span className="ml-2 text-xl font-bold">Unimed Recife</span>
               </div>
               <p className="text-gray-400">
