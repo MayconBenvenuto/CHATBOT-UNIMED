@@ -13,7 +13,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <img src="/logo-unimed.png" alt="Logo Unimed" className="w-[15em] h-[7em] object-contain" />
-              <span className="ml-2 text-xl font-bold text-gray-900">Planos de Saúde PME</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">Planos de Saúde Empresas</span>
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#beneficios" className="text-gray-700 hover:text-unimed-green">Benefícios</a>
@@ -38,8 +38,8 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-                Planos de Saúde PME
-                <span className="block text-green-200">Unimed</span>
+                Planos de Saúde Empresas <br />
+                <span className="block text-green-200">Unimed Recife</span>
               </h1>
               <p className="text-xl mb-8 text-green-100">
                 Proteja sua empresa e seus colaboradores com os melhores planos de saúde do mercado. 
@@ -62,7 +62,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
             </div>
             <div className="relative">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
-                <h3 className="text-2xl font-bold mb-6">Por que escolher a Unimed?</h3>
+                <h3 className="text-2xl font-bold mb-6">Por que escolher a Unimed Recife?</h3>
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <CheckCircle className="w-6 h-6 text-green-200 mr-3" />
@@ -74,11 +74,11 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="w-6 h-6 text-green-200 mr-3" />
-                    <span>Cobertura nacional</span>
+                    <span>Ampla cobertura com hospital de referência</span>
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="w-6 h-6 text-green-200 mr-3" />
-                    <span>Planos personalizados para PME</span>
+                    <span>Planos personalizados para PEQUENAS E MÉDIAS EMPRESAS - A PARTIR  DE 1 VIDA</span>
                   </div>
                 </div>
               </div>
@@ -92,7 +92,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Benefícios Exclusivos para PME
+              Benefícios Exclusivos para Pequenas e Médias Empresas
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Desenvolvemos soluções específicas para pequenas e médias empresas, 
@@ -143,7 +143,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Os Diferenciais da Unimed
+                Os Diferenciais da Unimed Recife
               </h2>
               <div className="space-y-6">
                 <div className="flex items-start">
@@ -201,15 +201,15 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                   <div className="text-green-200">Anos de Experiência</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">18M+</div>
+                  <div className="text-3xl font-bold mb-2">180.000+</div>
                   <div className="text-green-200">Beneficiários</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">100K+</div>
+                  <div className="text-3xl font-bold mb-2">2.000+</div>
                   <div className="text-green-200">Médicos Cooperados</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">350+</div>
+                  <div className="text-3xl font-bold mb-2">200+</div>
                   <div className="text-green-200">Cidades Atendidas</div>
                 </div>
               </div>
@@ -226,7 +226,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
               O que nossos clientes dizem
             </h2>
             <p className="text-xl text-gray-600">
-              Empresas que confiam na Unimed para cuidar da saúde de seus colaboradores
+              Empresas que confiam na Unimed Recife para cuidar da saúde de seus colaboradores
             </p>
           </div>
 
@@ -276,7 +276,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                 ))}
               </div>
               <p className="text-gray-600 mb-6">
-                "Migrar para a Unimed foi a melhor decisão. Reduzimos custos 
+                "Migrar para a Unimed Recife foi a melhor decisão. Reduzimos custos 
                 e aumentamos a satisfação da equipe."
               </p>
               <div className="flex items-center">
@@ -357,7 +357,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
             <div>
               <h3 className="text-lg font-semibold mb-4">Institucional</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>Sobre a Unimed</li>
+                <li>Sobre a Unimed Recife</li>
                 <li>Rede Credenciada</li>
                 <li>Sustentabilidade</li>
                 <li>Trabalhe Conosco</li>
@@ -366,7 +366,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
           </div>
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Unimed. Todos os direitos reservados.</p>
+            <p>&copy; 2025 Unimed. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
