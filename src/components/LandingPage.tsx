@@ -310,10 +310,11 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center mb-6">
-                <div className="w-8 h-8 bg-unimed-green rounded-full flex items-center justify-center">
+                <div className="w-13 h-13 bg-unimed-green rounded-full flex items-center justify-center">
+                  <img src="/logo-unimed.png" alt="Logo Unimed" className="w-[15em] h-[7em] object-contain" />
                   <Heart className="w-5 h-5 text-white" />
                 </div>
-                <span className="ml-2 text-xl font-bold">Unimed</span>
+                <span className="ml-2 text-xl font-bold">Unimed Recife</span>
               </div>
               <p className="text-gray-400">
                 Cuidando da saúde das empresas brasileiras há mais de 50 anos.
@@ -325,15 +326,15 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
               <div className="space-y-3">
                 <div className="flex items-center">
                   <Phone className="w-5 h-5 text-unimed-green mr-3" />
-                  <span className="text-gray-400">0800 123 4567</span>
+                  <span className="text-gray-400">81 98824-2023</span>
                 </div>
                 <div className="flex items-center">
                   <Mail className="w-5 h-5 text-unimed-green mr-3" />
-                  <span className="text-gray-400">pme@unimed.com.br</span>
+                  <span className="text-gray-400">brleao@gmail.com</span>
                 </div>
                 <div className="flex items-center">
                   <MapPin className="w-5 h-5 text-unimed-green mr-3" />
-                  <span className="text-gray-400">São Paulo, SP</span>
+                  <span className="text-gray-400">Recife, PE</span>
                 </div>
               </div>
             </div>
@@ -351,10 +352,18 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
             <div>
               <h3 className="text-lg font-semibold mb-4">Institucional</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>Sobre a Unimed Recife</li>
-                <li>Rede Credenciada</li>
-                <li>Sustentabilidade</li>
-                <li>Trabalhe Conosco</li>
+                <li>
+                  <a href="https://www.unimedrecife.com.br/institucional" target="_blank" rel="noopener noreferrer" className="hover:underline">Sobre a Unimed Recife</a>
+                </li>
+                <li>
+                  <a href="https://www.unimedrecife.com.br/rede-credenciada" target="_blank" rel="noopener noreferrer" className="hover:underline">Rede Credenciada</a>
+                </li>
+                <li>
+                  <a href="https://www.unimedrecife.com.br/sustentabilidade" target="_blank" rel="noopener noreferrer" className="hover:underline">Sustentabilidade</a>
+                </li>
+                <li>
+                  <a href="https://www.unimedrecife.com.br/trabalhe-conosco" target="_blank" rel="noopener noreferrer" className="hover:underline">Trabalhe Conosco</a>
+                </li>
               </ul>
             </div>
           </div>
