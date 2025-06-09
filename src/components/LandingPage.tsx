@@ -238,14 +238,12 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                 ))}
               </div>
               <p className="text-gray-600 mb-6">
-                "A Unimed transformou a gestão de saúde da nossa empresa. 
-                Atendimento excepcional e economia real no orçamento."
+                "A Unimed Recife sempre nos atendeu com muita agilidade e atenção. O suporte durante internações e consultas foi fundamental para o bem-estar dos nossos colaboradores."
               </p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
-                  <div className="font-semibold text-gray-900">Maria Silva</div>
-                  <div className="text-gray-600">CEO, TechStart</div>
+                  <div className="font-semibold text-gray-900">Patrícia Andrade</div>
+                  <div className="text-gray-600">Gestora de RH, Grupo Real</div>
                 </div>
               </div>
             </div>
@@ -257,14 +255,12 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                 ))}
               </div>
               <p className="text-gray-600 mb-6">
-                "Nossos funcionários estão muito satisfeitos com a qualidade 
-                do atendimento e a facilidade de acesso aos serviços."
+                "Tivemos uma redução significativa nos custos com saúde e nossos funcionários elogiam muito a rede credenciada e o atendimento humanizado. Recomendo a Unimed Recife."
               </p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
-                  <div className="font-semibold text-gray-900">João Santos</div>
-                  <div className="text-gray-600">Diretor, Inovação Ltda</div>
+                  <div className="font-semibold text-gray-900">Carlos Menezes</div>
+                  <div className="text-gray-600">Diretor, Construtora Nova Era</div>
                 </div>
               </div>
             </div>
@@ -276,14 +272,12 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                 ))}
               </div>
               <p className="text-gray-600 mb-6">
-                "Migrar para a Unimed Recife foi a melhor decisão. Reduzimos custos 
-                e aumentamos a satisfação da equipe."
+                "O programa de medicina preventiva da Unimed Recife fez toda diferença para a saúde dos nossos colaboradores. Atendimento rápido e eficiente em todas as demandas."
               </p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
                 <div>
-                  <div className="font-semibold text-gray-900">Ana Costa</div>
-                  <div className="text-gray-600">RH, Crescer Empresa</div>
+                  <div className="font-semibold text-gray-900">Fernanda Lima</div>
+                  <div className="text-gray-600">Supervisora, Tech Solutions</div>
                 </div>
               </div>
             </div>
