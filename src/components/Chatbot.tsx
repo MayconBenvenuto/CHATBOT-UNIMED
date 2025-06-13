@@ -3,7 +3,10 @@ import { useAction, useMutation } from "convex/react";
 import { toast } from "sonner";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { CheckCircle, Heart, Send, X } from "lucide-react";
+import ChatbotHeader from "./ChatbotHeader";
+import ChatbotMessages from "./ChatbotMessages";
+import ChatbotInput from "./ChatbotInput";
+import ChatbotFinalCTA from "./ChatbotFinalCTA";
 
 // --- INTERFACES E TIPOS ---
 interface ChatbotProps {
@@ -130,7 +133,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   const updateLead = useMutation(api.leads.updateLead);
   const sendEmail = useAction(api.email.sendLeadEmail);
   
-  // ... (Restante do código: scrollToBottom, useEffects, handleInputChange, etc. permanecem os mesmos)
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -260,14 +262,16 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     switch (step) {
       case "nome":
         return value.trim().length >= 2;
-      case "whatsapp":
+      case "whatsapp": {
         const cleanPhone = value.replace(/\D/g, "");
         return cleanPhone.length >= 10 && cleanPhone.length <= 11;
+      }
       case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      case "numero_cnpj":
+      case "numero_cnpj": {
         const cleanCnpj = value.replace(/\D/g, "");
         return cleanCnpj.length === 14;
+      }
       case "valor_plano":
         return /\d+/.test(value);
       default:
@@ -287,7 +291,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
 
   const handleOptionClick = (option: string) => {
     dispatch({ type: "SET_INPUT", payload: option });
-    setTimeout(() => handleSubmit(null, option), 100);
+    setTimeout(() => { void handleSubmit(null, option); }, 100);
   };
 
   const handleSubmit = async (e: React.FormEvent | null, optionValue?: string) => {
@@ -375,7 +379,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
                 dadosEmpresa,
               });
             }
-          } catch (err) {
+          } catch {
             // Não bloqueia o fluxo se a API falhar
           }
         }
@@ -430,143 +434,31 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       <div className="bg-white rounded-2xl w-full max-w-xs sm:max-w-sm md:max-w-md h-[70vh] max-h-[90vh] flex flex-col shadow-2xl fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 transition-all duration-300"
         style={{width: '100%', maxWidth: '350px'}}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-unimed-green to-green-600 text-white p-4 rounded-t-2xl">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Davi - Assistente Unimed</h3>
-                <p className="text-sm text-green-100">Online agora</p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors p-1"
-              aria-label="Fechar chatbot"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-white/20 rounded-full h-2">
-            <div 
-              className="bg-white h-2 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${getProgressPercentage()}%` }}
-            ></div>
-          </div>
-          <p className="text-xs text-green-100 mt-1">{getProgressPercentage()}% concluído</p>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4 bg-gray-50">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div className={`max-w-[85%] ${message.type === "user" ? "" : "flex items-start space-x-2"}`}>
-                {message.type === "bot" && (
-                  <div className="w-8 h-8 bg-unimed-green rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-white text-sm">{getStepIcon(step)}</span>
-                  </div>
-                )}
-                <div
-                  className={`p-3 rounded-2xl ${
-                    message.type === "user"
-                      ? "bg-unimed-green text-white rounded-br-md"
-                      : "bg-white text-gray-900 shadow-sm border rounded-bl-md"
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed">{message.text}</p>
-                  
-                  {message.options && message.type === "bot" && (
-                    <div className="mt-3 space-y-2">
-                      {message.options.map((option, optIndex) => (
-                        <button
-                          key={optIndex}
-                          onClick={() => handleOptionClick(option)}
-                          className="block w-full text-left px-3 py-2 text-sm bg-gray-50 hover:bg-unimed-green hover:text-white transition-colors rounded-lg border border-gray-200"
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-          
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="flex items-start space-x-2">
-                <div className="w-8 h-8 bg-unimed-green rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">💭</span>
-                </div>
-                <div className="bg-white p-3 rounded-2xl rounded-bl-md shadow-sm border">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
-
+        <ChatbotHeader onClose={onClose} progress={getProgressPercentage()} />
+        <ChatbotMessages
+          messages={messages}
+          step={step as string}
+          isTyping={isTyping}
+          getStepIcon={getStepIcon as (step: string) => string}
+          handleOptionClick={handleOptionClick}
+          messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
+        />
         {/* Input */}
         {step !== "finalizado" && !isTyping && (
-          <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-200 relative">
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={handleInputChange}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    handleSubmit(e as any);
-                  }
-                }}
-                placeholder={getInputPlaceholder(step)}
-                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-unimed-green transition-shadow text-sm"
-                disabled={isTyping}
-                maxLength={step === 'numero_cnpj' ? 18 : undefined}
-              />
-              <button
-                type="submit"
-                disabled={!input.trim()}
-                className="absolute right-5 top-1/2 -translate-y-1/2 bg-unimed-green text-white p-2 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Enviar mensagem"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-          </form>
+          <ChatbotInput
+            input={input}
+            step={step as string}
+            isTyping={isTyping}
+            inputRef={inputRef as React.RefObject<HTMLInputElement>}
+            handleInputChange={handleInputChange}
+            handleSubmit={handleSubmit as (e: React.FormEvent) => void}
+            getInputPlaceholder={getInputPlaceholder as (step: string) => string}
+          />
         )}
 
         {/* Final CTA */}
         {step === "finalizado" && (
-          <div className="p-4 border-t bg-white rounded-b-2xl">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle className="w-8 h-8 text-unimed-green" />
-              </div>
-              <p className="text-sm text-gray-600">
-                Informações enviadas com sucesso! 
-              </p>
-              <button
-                onClick={onClose}
-                className="w-full bg-unimed-green text-white py-3 rounded-xl hover:bg-green-700 transition-colors font-semibold"
-              >
-                Fechar Chat
-              </button>
-            </div>
-          </div>
+          <ChatbotFinalCTA onClose={onClose} />
         )}
       </div>
     </div>

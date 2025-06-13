@@ -10,7 +10,7 @@ const applicationTables = {
     temCnpj: v.boolean(),
     enquadramentoCnpj: v.optional(v.string()),
     numeroCnpj: v.optional(v.string()),
-    temFuncionarios: v.optional(v.boolean()), // <-- LINHA ADICIONADA
+    temFuncionarios: v.optional(v.boolean()),
     temPlanoAtual: v.optional(v.boolean()),
     nomePlanoAtual: v.optional(v.string()),
     valorPlanoAtual: v.optional(v.string()),
@@ -21,7 +21,10 @@ const applicationTables = {
     // Adicionamos um campo para armazenar os dados da empresa validados pela API.
     // Usamos v.any() por simplicidade, pois a resposta da API pode ter muitos campos.
     dadosEmpresa: v.optional(v.any()),
-  }),
+  })
+  // Sugestão: Adicione índices para consultas futuras
+  // .index('by_email', ['email'])
+  // .index('by_numeroCnpj', ['numeroCnpj'])
 };
 
 export default defineSchema({
