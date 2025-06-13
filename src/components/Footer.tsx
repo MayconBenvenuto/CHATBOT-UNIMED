@@ -42,23 +42,6 @@ export default function Footer() {
               <li>Consultoria em Saúde</li>
             </ul>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Institucional</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <a href="https://www.unimedrecife.com.br/institucional" target="_blank" rel="noopener noreferrer" className="hover:underline">Sobre a Unimed Recife</a>
-              </li>
-              <li>
-                <a href="https://www.unimedrecife.com.br/rede-credenciada" target="_blank" rel="noopener noreferrer" className="hover:underline">Rede Credenciada</a>
-              </li>
-              <li>
-                <a href="https://www.unimedrecife.com.br/sustentabilidade" target="_blank" rel="noopener noreferrer" className="hover:underline">Sustentabilidade</a>
-              </li>
-              <li>
-                <a href="https://www.unimedrecife.com.br/trabalhe-conosco" target="_blank" rel="noopener noreferrer" className="hover:underline">Trabalhe Conosco</a>
-              </li>
-            </ul>
-          </div>
         </div>
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
           <p>&copy; 2025 Unimed. Todos os direitos reservados.</p>

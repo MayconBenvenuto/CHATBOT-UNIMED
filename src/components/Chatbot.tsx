@@ -16,10 +16,7 @@ interface ChatbotProps {
 type ChatStep =
   | "nome"
   | "whatsapp"
-  | "email"
   | "cnpj"
-  | "enquadramento"
-  | "numero_cnpj"
   | "plano_atual"
   | "nome_plano"
   | "valor_plano"
@@ -29,10 +26,7 @@ type ChatStep =
 interface ChatData {
   nome: string;
   whatsapp: string;
-  email: string;
-  temCnpj: boolean;
-  enquadramentoCnpj: string;
-  numeroCnpj: string;
+  cnpj: string;
   temPlanoAtual: boolean;
   nomePlanoAtual: string;
   valorPlanoAtual: string;
@@ -197,11 +191,8 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   const getNextStep = (currentStep: ChatStep, data: Partial<ChatData>): ChatStep => {
     switch (currentStep) {
       case "nome": return "whatsapp";
-      case "whatsapp": return "email";
-      case "email": return "cnpj";
-      case "cnpj": return data.temCnpj ? "enquadramento" : "plano_atual";
-      case "enquadramento": return "numero_cnpj";
-      case "numero_cnpj": return "plano_atual";
+      case "whatsapp": return "cnpj";
+      case "cnpj": return "plano_atual";
       case "plano_atual": return data.temPlanoAtual ? "nome_plano" : "dificuldade";
       case "nome_plano": return "valor_plano";
       case "valor_plano": return "dificuldade";
@@ -210,52 +201,40 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     }
   };
   const getBotMessage = (step: ChatStep, data: Partial<ChatData>): { text: string; options?: string[] } => {
-        switch (step) {
-      case "whatsapp": 
-        return { text: `Perfeito, ${data.nome}! 📱 Agora preciso do seu WhatsApp para nosso consultor entrar em contato:` };
-      case "email": 
-        return { text: "Ótimo! 📧 Qual é o seu e-mail?" };
-      case "cnpj": 
-        return { 
-          text: "🏢 Sua empresa possui CNPJ?", 
-          options: ["Sim", "Não"] 
-        };
-      case "enquadramento": 
-        return { 
-          text: "📋 Qual o enquadramento do seu CNPJ?", 
-          options: ["MEI", "Simples Nacional", "Lucro Presumido", "Lucro Real", "Outro"] 
-        };
-      case "numero_cnpj": 
-        return { text: "🔢 Qual é o número do CNPJ da sua empresa?" };
-      case "plano_atual": 
-        return { 
-          text: "🏥 Vocês já possuem algum plano de saúde atualmente?", 
-          options: ["Sim", "Não"] 
-        };
-      case "nome_plano": 
-        return { 
-          text: "📝 Qual é o nome do plano de saúde atual?",
-          options: ["Bradesco Saúde", "SulAmérica", "Amil", "NotreDame", "Hapvida", "Outro"]
-        };
-      case "valor_plano": 
-        return { text: "💰 Quanto vocês pagam mensalmente pelo plano atual? (Ex: R$ 350,00)" };
-      case "dificuldade": 
-        return { 
-          text: "🤔 Qual é a maior dificuldade que vocês enfrentam com planos de saúde?",
-          options: [
-            "Alto custo",
-            "Rede médica limitada", 
-            "Demora no atendimento",
-            "Cobertura insuficiente",
-            "Burocracia excessiva",
-            "Outro"
-          ]
-        };
-      case "finalizado": 
-        return { text: `🎉 Perfeito, ${data.nome}! Recebi todas as informações. Nossa equipe analisará seu perfil e entrará em contato em até 24 horas com as melhores opções para sua empresa. Obrigada!` };
-      default: 
-        return { text: "" };
-    }
+  switch (step) {
+    case "whatsapp": 
+      return { text: `Perfeito, ${data.nome}! 📱 Agora preciso do seu WhatsApp para nosso consultor entrar em contato:` };
+    case "cnpj": 
+      return { text: "🏢 QUAL O SEU CNPJ?" };
+    case "plano_atual": 
+      return { 
+        text: "🏥 Vocês já possuem algum plano de saúde atualmente?", 
+        options: ["Sim", "Não"] 
+      };
+    case "nome_plano": 
+      return { 
+        text: "📝 Qual é o nome do plano de saúde atual?",
+        options: ["Bradesco Saúde", "SulAmérica", "Amil", "NotreDame", "Hapvida", "Outro"]
+      };
+    case "valor_plano": 
+      return { text: "💰 Quanto vocês pagam mensalmente pelo plano atual? (Ex: R$ 350,00)" };
+    case "dificuldade": 
+      return { 
+        text: "🤔 Qual é a maior dificuldade que vocês enfrentam com planos de saúde?",
+        options: [
+          "Alto custo",
+          "Rede médica limitada", 
+          "Demora no atendimento",
+          "Cobertura insuficiente",
+          "Burocracia excessiva",
+          "Outro"
+        ]
+      };
+    case "finalizado": 
+      return { text: `🎉 Perfeito, ${data.nome}! Recebi todas as informações. Nossa equipe analisará seu perfil e entrará em contato em até 24 horas com as melhores opções para sua empresa. Obrigada!` };
+    default: 
+      return { text: "" };
+  }
   };
 
   const validateInput = (step: ChatStep, value: string): boolean => {
@@ -324,9 +303,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       case "nome": newData.nome = value; break;
       case "whatsapp": newData.whatsapp = value; break;
       case "email": newData.email = value; break;
-      case "cnpj": newData.temCnpj = value.toLowerCase() === "sim"; break;
-      case "enquadramento": newData.enquadramentoCnpj = value; break;
-      case "numero_cnpj": newData.numeroCnpj = value; break;
+      case "cnpj": newData.cnpj = value; break;
       case "plano_atual": newData.temPlanoAtual = value.toLowerCase() === "sim"; break;
       case "nome_plano": newData.nomePlanoAtual = value; break;
       case "valor_plano": newData.valorPlanoAtual = value; break;
