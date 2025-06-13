@@ -16,7 +16,10 @@ interface ChatbotProps {
 type ChatStep =
   | "nome"
   | "whatsapp"
+  | "email" // Adicionado campo de email
   | "cnpj"
+  | "numero_cnpj" // Adicionado campo para número do CNPJ
+  | "enquadramento" // Adicionado campo para enquadramento
   | "plano_atual"
   | "nome_plano"
   | "valor_plano"
@@ -26,7 +29,10 @@ type ChatStep =
 interface ChatData {
   nome: string;
   whatsapp: string;
-  cnpj: string;
+  email: string; // Campo obrigatório para envio de email
+  temCnpj: boolean;
+  enquadramentoCnpj: string;
+  numeroCnpj: string;
   temPlanoAtual: boolean;
   nomePlanoAtual: string;
   valorPlanoAtual: string;
@@ -191,8 +197,11 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   const getNextStep = (currentStep: ChatStep, data: Partial<ChatData>): ChatStep => {
     switch (currentStep) {
       case "nome": return "whatsapp";
-      case "whatsapp": return "cnpj";
-      case "cnpj": return "plano_atual";
+      case "whatsapp": return "email";
+      case "email": return "cnpj";
+      case "cnpj": return data.temCnpj ? "numero_cnpj" : "plano_atual";
+      case "numero_cnpj": return "enquadramento";
+      case "enquadramento": return "plano_atual";
       case "plano_atual": return data.temPlanoAtual ? "nome_plano" : "dificuldade";
       case "nome_plano": return "valor_plano";
       case "valor_plano": return "dificuldade";
@@ -204,8 +213,20 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   switch (step) {
     case "whatsapp": 
       return { text: `Perfeito, ${data.nome}! 📱 Agora preciso do seu WhatsApp para nosso consultor entrar em contato:` };
+    case "email":
+      return { text: "📧 E qual o seu e-mail para contato?" };
     case "cnpj": 
-      return { text: "🏢 QUAL O SEU CNPJ?" };
+      return { 
+        text: "🏢 Sua empresa possui CNPJ?",
+        options: ["Sim", "Não"]
+      };
+    case "numero_cnpj":
+      return { text: "🔢 Por favor, digite o número do CNPJ:" };
+    case "enquadramento":
+      return { 
+        text: "📋 Qual o enquadramento da sua empresa?",
+        options: ["MEI", "ME", "EPP", "Outros"]
+      };
     case "plano_atual": 
       return { 
         text: "🏥 Vocês já possuem algum plano de saúde atualmente?", 
@@ -303,7 +324,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       case "nome": newData.nome = value; break;
       case "whatsapp": newData.whatsapp = value; break;
       case "email": newData.email = value; break;
-      case "cnpj": newData.cnpj = value; break;
+      case "cnpj": newData.temCnpj = value.toLowerCase() === "sim"; break;
+      case "numero_cnpj": newData.numeroCnpj = value; break;
+      case "enquadramento": newData.enquadramentoCnpj = value; break;
       case "plano_atual": newData.temPlanoAtual = value.toLowerCase() === "sim"; break;
       case "nome_plano": newData.nomePlanoAtual = value; break;
       case "valor_plano": newData.valorPlanoAtual = value; break;
@@ -316,20 +339,42 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     // ... (O restante da função handleSubmit, com a lógica de salvar e enviar e-mail, permanece igual)
     let currentLeadId = leadId;
     try {
-      if (step === "cnpj" && newData.nome && newData.whatsapp && newData.email) {
+      // Criamos o lead quando tivermos os dados básicos de contato (nome, whatsapp e email)
+      if (step === "email" && newData.nome && newData.whatsapp && newData.email) {
+        console.log("Criando novo lead com dados básicos:", {
+          nome: newData.nome,
+          whatsapp: newData.whatsapp,
+          email: newData.email
+        });
+        
         const id = await createLead({
           nome: newData.nome,
           whatsapp: newData.whatsapp,
           email: newData.email,
-          temCnpj: newData.temCnpj || false,
+          temCnpj: false, // Valor padrão, será atualizado mais tarde
         });
+        
+        console.log("Lead criado com ID:", id);
         dispatch({ type: "SET_LEAD_ID", payload: id });
         currentLeadId = id; 
       } else if (leadId) {
+        // Para as atualizações subsequentes
+        console.log("Atualizando lead:", leadId, "com dados:", {
+          enquadramentoCnpj: newData.enquadramentoCnpj,
+          numeroCnpj: newData.numeroCnpj,
+          temCnpj: newData.temCnpj,
+          temPlanoAtual: newData.temPlanoAtual,
+          nomePlanoAtual: newData.nomePlanoAtual,
+          valorPlanoAtual: newData.valorPlanoAtual,
+          maiorDificuldade: newData.maiorDificuldade,
+          status: step === "dificuldade" ? "completo" : "em_andamento",
+        });
+        
         await updateLead({
           leadId,
           enquadramentoCnpj: newData.enquadramentoCnpj,
           numeroCnpj: newData.numeroCnpj,
+          temCnpj: newData.temCnpj,
           temPlanoAtual: newData.temPlanoAtual,
           nomePlanoAtual: newData.nomePlanoAtual,
           valorPlanoAtual: newData.valorPlanoAtual,
@@ -344,39 +389,60 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     
     if (nextStep === "finalizado" && currentLeadId) {
       try {
-        // Busca e salva os dados da empresa ANTES de enviar o e-mail
-        if (newData.numeroCnpj) {
-          const cleanedCnpj = newData.numeroCnpj.replace(/\D/g, "");
-          try {
-            const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanedCnpj}`);
-            if (response.ok) {
-              const dadosEmpresa = await response.json();
-              await updateLead({
-                leadId: currentLeadId,
-                dadosEmpresa,
-              });
-            }
-          } catch {
-            // Não bloqueia o fluxo se a API falhar
-          }
-        }
-        // Garante que todos os dados estejam salvos antes de enviar o e-mail
+        // Garantimos que todas as informações estejam atualizadas antes de enviar o email
+        console.log("Finalizando fluxo do chatbot com leadId:", currentLeadId);
         await updateLead({
           leadId: currentLeadId,
+          status: "completo",
+          // Garantimos que todas as informações estejam atualizadas
           enquadramentoCnpj: newData.enquadramentoCnpj,
           numeroCnpj: newData.numeroCnpj,
           temPlanoAtual: newData.temPlanoAtual,
           nomePlanoAtual: newData.nomePlanoAtual,
           valorPlanoAtual: newData.valorPlanoAtual,
           maiorDificuldade: newData.maiorDificuldade,
-          status: "completo",
         });
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await sendEmail({ leadId: currentLeadId });
-        toast.success("✅ Informações enviadas! Em breve nosso consultor entrará em contato.");
+        
+        // Adicionamos um pequeno delay para garantir que a atualização foi concluída
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Enviamos o email
+        console.log("Enviando email para leadId:", currentLeadId);
+        toast.loading("Enviando suas informações...");
+        
+        try {
+          const emailResult = await sendEmail({ leadId: currentLeadId });
+          console.log("Resultado do envio de email:", emailResult);
+          
+          if (emailResult.success) {
+            toast.success("✅ Informações enviadas com sucesso! Em breve nosso consultor entrará em contato.");
+          } else {
+            throw new Error("Falha ao enviar e-mail");
+          }
+        } catch (emailError: any) {
+          console.error("Erro ao enviar e-mail:", emailError);
+          toast.error(`❌ Erro ao enviar e-mail: ${emailError.message || "Erro desconhecido"}`);
+          
+          // Tentamos enviar novamente após 3 segundos
+          const finalLeadId = currentLeadId; // Capturamos o ID do lead para usar no setTimeout
+          setTimeout(() => {
+            sendEmail({ leadId: finalLeadId })
+              .then(retryResult => {
+                if (retryResult.success) {
+                  toast.success("✅ E-mail enviado com sucesso na segunda tentativa!");
+                } else {
+                  toast.error("❌ Não foi possível enviar o e-mail. Nossa equipe foi notificada e entrará em contato em breve.");
+                }
+              })
+              .catch(retryError => {
+                console.error("Erro na segunda tentativa de envio:", retryError);
+                toast.error("❌ Não foi possível enviar o e-mail. Nossa equipe foi notificada e entrará em contato em breve.");
+              });
+          }, 3000);
+        }
       } catch (error) {
-        console.error("Falha ao enviar e-mail de notificação:", error);
-        toast.error("❌ Ops! Seus dados foram salvos, mas não conseguimos notificar nosso time. Entraremos em contato assim que possível!");
+        console.error("Erro ao finalizar processo:", error);
+        toast.error("❌ Seus dados foram salvos, mas ocorreu um erro ao processá-los. Nossa equipe entrará em contato em breve!");
       }
     }
 
