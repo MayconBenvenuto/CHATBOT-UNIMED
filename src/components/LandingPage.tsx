@@ -42,7 +42,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                 <span className="block text-green-200">Unimed Recife</span>
               </h1>
               <p className="text-xl mb-8 text-green-100">
-                Proteja sua empresa e seus colaboradores com os melhores planos de saúde do mercado. 
+                Proteja sua empresa e seus colaboradores com o melhor plano de saúde do mercado. 
                 Cobertura completa, atendimento humanizado e economia garantida.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -78,7 +78,7 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="w-6 h-6 text-green-200 mr-3" />
-                    <span>Planos personalizados para PEQUENAS E MÉDIAS EMPRESAS - A PARTIR  DE 1 VIDA</span>
+                    <span>Planos personalizados para PEQUENAS, MÉDIAS E GRANDES EMPRESAS - A PARTIR  DE 1 VIDA</span>
                   </div>
                 </div>
               </div>
@@ -92,10 +92,10 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Benefícios Exclusivos para Pequenas e Médias Empresas
+              Benefícios Exclusivos para Pequenas, Médias e Grandes Empresas
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Desenvolvemos soluções específicas para pequenas e médias empresas, 
+              Desenvolvemos soluções específicas para pequenas, médias e grandes empresas, 
               oferecendo o melhor custo-benefício do mercado.
             </p>
           </div>
