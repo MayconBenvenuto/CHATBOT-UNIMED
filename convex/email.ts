@@ -52,8 +52,13 @@ export const sendLeadEmail = action({
       let dadosEmpresaHtml = "";
 
       // --- BLOCO PRINCIPAL DA MUDANÇA ---
-      // Se o lead tiver um CNPJ, tentamos validá-lo e buscar os dados da empresa.
-      if (lead.temCnpj && lead.numeroCnpj) {
+      // Se o lead já tiver dados da empresa armazenados, usamos primeiro
+      if (lead.dadosEmpresa) {
+        dadosEmpresa = lead.dadosEmpresa;
+        console.log("[sendLeadEmail] Usando dados da empresa já armazenados:", dadosEmpresa);
+      }
+      // Se não tiver, mas tiver CNPJ, tentamos validar e buscar os dados
+      else if (lead.temCnpj && lead.numeroCnpj) {
         try {
           const cleanedCnpj = lead.numeroCnpj.replace(/\D/g, "");
           console.log("[sendLeadEmail] Buscando dados do CNPJ:", cleanedCnpj);
@@ -66,34 +71,26 @@ export const sendLeadEmail = action({
               dadosEmpresa: dadosEmpresa,
             });
             console.log("[sendLeadEmail] Dados da empresa obtidos e salvos:", dadosEmpresa);
-          } else if (lead.dadosEmpresa) {
-            // Fallback: usa os dados já salvos no lead
-            dadosEmpresa = lead.dadosEmpresa;
-            console.log("[sendLeadEmail] Usando dadosEmpresa já salvos no lead.");
           }
         } catch (error) {
           console.error("Falha ao buscar dados do CNPJ na BrasilAPI:", error);
-          // Fallback: usa os dados já salvos no lead
-          if (lead.dadosEmpresa) {
-            dadosEmpresa = lead.dadosEmpresa;
-            console.log("[sendLeadEmail] Usando dadosEmpresa já salvos no lead após erro.");
-          }
         }
-        // Monta o HTML se houver dados da empresa
-        if (dadosEmpresa) {
-          dadosEmpresaHtml = `
-            <div class="section">
-              <h3>🏢 Dados da Empresa (Validados)</h3>
-              <div class="info-item"><strong>Razão Social:</strong> ${dadosEmpresa.razao_social || 'N/A'}</div>
-              <div class="info-item"><strong>Nome Fantasia:</strong> ${dadosEmpresa.nome_fantasia || 'N/A'}</div>
-              <div class="info-item"><strong>Situação Cadastral:</strong> ${dadosEmpresa.descricao_situacao_cadastral || 'N/A'}</div>
-              <div class="info-item"><strong>Atividade Principal:</strong> ${dadosEmpresa.cnae_fiscal_descricao || 'N/A'}</div>
-              <div class="info-item"><strong>Endereço:</strong> ${dadosEmpresa.logradouro || ''}, ${dadosEmpresa.numero || ''}, ${dadosEmpresa.bairro || ''} - ${dadosEmpresa.municipio || ''}/${dadosEmpresa.uf || ''}</div>
-              <div class="info-item"><strong>CEP:</strong> ${dadosEmpresa.cep || 'N/A'}</div>
-              <div class="info-item"><strong>Data de Abertura:</strong> ${dadosEmpresa.data_inicio_atividade || 'N/A'}</div>
-            </div>
-          `;
-        }
+      }
+
+      // Monta o HTML se houver dados da empresa
+      if (dadosEmpresa) {
+        dadosEmpresaHtml = `
+          <div class="section">
+            <h3>🏢 Dados da Empresa (Validados)</h3>
+            <div class="info-item"><strong>Razão Social:</strong> ${dadosEmpresa.razao_social || 'N/A'}</div>
+            <div class="info-item"><strong>Nome Fantasia:</strong> ${dadosEmpresa.nome_fantasia || 'N/A'}</div>
+            <div class="info-item"><strong>Situação Cadastral:</strong> ${dadosEmpresa.descricao_situacao_cadastral || 'N/A'}</div>
+            <div class="info-item"><strong>Atividade Principal:</strong> ${dadosEmpresa.cnae_fiscal_descricao || 'N/A'}</div>
+            <div class="info-item"><strong>Endereço:</strong> ${dadosEmpresa.logradouro || ''}, ${dadosEmpresa.numero || ''}, ${dadosEmpresa.bairro || ''} - ${dadosEmpresa.municipio || ''}/${dadosEmpresa.uf || ''}</div>
+            <div class="info-item"><strong>CEP:</strong> ${dadosEmpresa.cep || 'N/A'}</div>
+            <div class="info-item"><strong>Data de Abertura:</strong> ${dadosEmpresa.data_inicio_atividade || 'N/A'}</div>
+          </div>
+        `;
       }
 
       // Preparação do link do WhatsApp e do conteúdo do e-mail

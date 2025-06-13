@@ -16,10 +16,7 @@ interface ChatbotProps {
 type ChatStep =
   | "nome"
   | "whatsapp"
-  | "email" // Adicionado campo de email
-  | "cnpj"
-  | "numero_cnpj" // Adicionado campo para número do CNPJ
-  | "enquadramento" // Adicionado campo para enquadramento
+  | "numero_cnpj" // Alterado para ser apenas número do CNPJ, não perguntamos mais se tem CNPJ
   | "plano_atual"
   | "nome_plano"
   | "valor_plano"
@@ -33,6 +30,7 @@ interface ChatData {
   temCnpj: boolean;
   enquadramentoCnpj: string;
   numeroCnpj: string;
+  dadosEmpresa?: any; // Adicionando os dados da empresa
   temPlanoAtual: boolean;
   nomePlanoAtual: string;
   valorPlanoAtual: string;
@@ -99,10 +97,10 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
 }
 
 // !!! MUDANÇA AQUI: Nova função para validar CNPJ com a BrasilAPI !!!
-async function validateCnpjWithAPI(cnpj: string): Promise<boolean> {
+async function validateCnpjWithAPI(cnpj: string): Promise<{ isValid: boolean; dadosEmpresa?: any }> {
   const cleanedCnpj = cnpj.replace(/\D/g, ""); // Remove pontos, traços e barras
   if (cleanedCnpj.length !== 14) {
-    return false;
+    return { isValid: false };
   }
 
   try {
@@ -111,14 +109,14 @@ async function validateCnpjWithAPI(cnpj: string): Promise<boolean> {
       // response.ok é true para status 200-299
       const data = await response.json();
       console.log("CNPJ Válido:", data); // Opcional: ver dados da empresa no console
-      return true;
+      return { isValid: true, dadosEmpresa: data };
     }
-    return false;
+    return { isValid: false };
   } catch (error) {
     console.error("Erro ao validar CNPJ:", error);
     // Se a API falhar, não bloqueamos o usuário, mas avisamos do problema.
     toast.error("Não foi possível validar o CNPJ no momento. Tente novamente.");
-    return false;
+    return { isValid: false };
   }
 }
 
@@ -197,11 +195,8 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   const getNextStep = (currentStep: ChatStep, data: Partial<ChatData>): ChatStep => {
     switch (currentStep) {
       case "nome": return "whatsapp";
-      case "whatsapp": return "email";
-      case "email": return "cnpj";
-      case "cnpj": return data.temCnpj ? "numero_cnpj" : "plano_atual";
-      case "numero_cnpj": return "enquadramento";
-      case "enquadramento": return "plano_atual";
+      case "whatsapp": return "numero_cnpj";
+      case "numero_cnpj": return "plano_atual";
       case "plano_atual": return data.temPlanoAtual ? "nome_plano" : "dificuldade";
       case "nome_plano": return "valor_plano";
       case "valor_plano": return "dificuldade";
@@ -213,20 +208,8 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   switch (step) {
     case "whatsapp": 
       return { text: `Perfeito, ${data.nome}! 📱 Agora preciso do seu WhatsApp para nosso consultor entrar em contato:` };
-    case "email":
-      return { text: "📧 E qual o seu e-mail para contato?" };
-    case "cnpj": 
-      return { 
-        text: "🏢 Sua empresa possui CNPJ?",
-        options: ["Sim", "Não"]
-      };
     case "numero_cnpj":
-      return { text: "🔢 Por favor, digite o número do CNPJ:" };
-    case "enquadramento":
-      return { 
-        text: "📋 Qual o enquadramento da sua empresa?",
-        options: ["MEI", "ME", "EPP", "Outros"]
-      };
+      return { text: "🏢 Qual seu CNPJ?" };
     case "plano_atual": 
       return { 
         text: "🏥 Vocês já possuem algum plano de saúde atualmente?", 
@@ -266,8 +249,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         const cleanPhone = value.replace(/\D/g, "");
         return cleanPhone.length >= 10 && cleanPhone.length <= 11;
       }
-      case "email":
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
       case "numero_cnpj": {
         const cleanCnpj = value.replace(/\D/g, "");
         return cleanCnpj.length === 14;
@@ -282,7 +263,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     switch (step) {
         case "nome": return "Digite seu nome completo...";
         case "whatsapp": return "(11) 99999-9999";
-        case "email": return "seu@email.com";
         case "numero_cnpj": return "00.000.000/0000-00";
         case "valor_plano": return "R$ 0,00";
         default: return "Digite sua resposta...";
@@ -305,28 +285,44 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       return;
     }
 
-    // !!! MUDANÇA AQUI: Lógica de validação do CNPJ antes de prosseguir !!!
+    const newData = { ...chatData };
+    
+    // Validação e obtenção dos dados do CNPJ antes de prosseguir
     if (step === "numero_cnpj") {
       dispatch({ type: "SET_IS_TYPING", payload: true }); // Mostra feedback de "validando"
-      const isCnpjValid = await validateCnpjWithAPI(value);
+      toast.loading("Validando CNPJ...");
+      
+      const cnpjResult = await validateCnpjWithAPI(value);
       dispatch({ type: "SET_IS_TYPING", payload: false }); // Esconde feedback
+      toast.dismiss(); // Remove o toast de loading
 
-      if (!isCnpjValid) {
+      if (!cnpjResult.isValid) {
         toast.error("❌ CNPJ inválido ou não encontrado. Por favor, verifique o número digitado.");
         return; // Interrompe a execução se o CNPJ for inválido
+      }
+      
+      // Armazena os dados da empresa no estado
+      if (cnpjResult.dadosEmpresa) {
+        newData.dadosEmpresa = cnpjResult.dadosEmpresa;
+        
+        // Adiciona uma mensagem do bot informando os dados validados
+        const empresaInfo = `✅ CNPJ Validado!\n\nEmpresa: ${cnpjResult.dadosEmpresa.razao_social || 'N/A'}\nNome Fantasia: ${cnpjResult.dadosEmpresa.nome_fantasia || 'N/A'}\nCidade: ${cnpjResult.dadosEmpresa.municipio || 'N/A'}/${cnpjResult.dadosEmpresa.uf || 'N/A'}`;
+        
+        // Adicionamos a mensagem do bot mostrando os dados da empresa
+        dispatch({ type: "ADD_MESSAGE", payload: { type: "bot", text: empresaInfo } });
+        
+        toast.success(`CNPJ validado: ${cnpjResult.dadosEmpresa.nome_fantasia || cnpjResult.dadosEmpresa.razao_social || 'Empresa'}`);
+      } else {
+        toast.success("✅ CNPJ validado com sucesso!");
       }
     }
 
     dispatch({ type: "ADD_MESSAGE", payload: { type: "user", text: value } });
 
-    const newData = { ...chatData };
     switch (step) {
       case "nome": newData.nome = value; break;
       case "whatsapp": newData.whatsapp = value; break;
-      case "email": newData.email = value; break;
-      case "cnpj": newData.temCnpj = value.toLowerCase() === "sim"; break;
       case "numero_cnpj": newData.numeroCnpj = value; break;
-      case "enquadramento": newData.enquadramentoCnpj = value; break;
       case "plano_atual": newData.temPlanoAtual = value.toLowerCase() === "sim"; break;
       case "nome_plano": newData.nomePlanoAtual = value; break;
       case "valor_plano": newData.valorPlanoAtual = value; break;
@@ -339,19 +335,22 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     // ... (O restante da função handleSubmit, com a lógica de salvar e enviar e-mail, permanece igual)
     let currentLeadId = leadId;
     try {
-      // Criamos o lead quando tivermos os dados básicos de contato (nome, whatsapp e email)
-      if (step === "email" && newData.nome && newData.whatsapp && newData.email) {
+      // Criamos o lead quando tivermos os dados básicos de contato (nome e whatsapp)
+      if (step === "whatsapp" && newData.nome && newData.whatsapp) {
+        // Geramos um email fictício baseado no número de WhatsApp para mantermos compatibilidade
+        const whatsappEmail = `${newData.whatsapp.replace(/\D/g, "")}@whatsapp.cliente`;
+        
         console.log("Criando novo lead com dados básicos:", {
           nome: newData.nome,
           whatsapp: newData.whatsapp,
-          email: newData.email
+          email: whatsappEmail
         });
         
         const id = await createLead({
           nome: newData.nome,
           whatsapp: newData.whatsapp,
-          email: newData.email,
-          temCnpj: false, // Valor padrão, será atualizado mais tarde
+          email: whatsappEmail,
+          temCnpj: true, // Como agora perguntamos diretamente o CNPJ, assumimos que tem CNPJ
         });
         
         console.log("Lead criado com ID:", id);
@@ -360,9 +359,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       } else if (leadId) {
         // Para as atualizações subsequentes
         console.log("Atualizando lead:", leadId, "com dados:", {
-          enquadramentoCnpj: newData.enquadramentoCnpj,
           numeroCnpj: newData.numeroCnpj,
-          temCnpj: newData.temCnpj,
+          temCnpj: newData.numeroCnpj ? true : false,
+          dadosEmpresa: newData.dadosEmpresa, // Incluindo dados da empresa
           temPlanoAtual: newData.temPlanoAtual,
           nomePlanoAtual: newData.nomePlanoAtual,
           valorPlanoAtual: newData.valorPlanoAtual,
@@ -372,9 +371,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         
         await updateLead({
           leadId,
-          enquadramentoCnpj: newData.enquadramentoCnpj,
           numeroCnpj: newData.numeroCnpj,
-          temCnpj: newData.temCnpj,
+          temCnpj: newData.numeroCnpj ? true : false,
+          dadosEmpresa: newData.dadosEmpresa, // Incluindo dados da empresa
           temPlanoAtual: newData.temPlanoAtual,
           nomePlanoAtual: newData.nomePlanoAtual,
           valorPlanoAtual: newData.valorPlanoAtual,
@@ -453,10 +452,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     switch (step) {
       case "nome": return "👤";
       case "whatsapp": return "📱";
-      case "email": return "📧";
-      case "cnpj": return "🏢";
-      case "enquadramento": return "📋";
-      case "numero_cnpj": return "🔢";
+      case "numero_cnpj": return "🏢";
       case "plano_atual": return "🏥";
       case "nome_plano": return "📝";
       case "valor_plano": return "💰";
@@ -467,7 +463,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   };
 
   const getProgressPercentage = () => {
-    const steps = ["nome", "whatsapp", "email", "cnpj", "enquadramento", "numero_cnpj", "plano_atual", "nome_plano", "valor_plano", "dificuldade", "finalizado"];
+    const steps = ["nome", "whatsapp", "numero_cnpj", "plano_atual", "nome_plano", "valor_plano", "dificuldade", "finalizado"];
     const currentIndex = steps.indexOf(step);
     return Math.round((currentIndex / (steps.length - 1)) * 100);
   };
