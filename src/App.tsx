@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Toaster } from "sonner";
 import LandingPage from "./components/LandingPage";
 import Chatbot from "./components/Chatbot";
+import WhatsAppFloat from "./components/WhatsAppFloat";
 
 export default function App() {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function App() {
       {isChatbotOpen && (
         <Chatbot onClose={() => setIsChatbotOpen(false)} />
       )}
+      <WhatsAppFloat />
       <Toaster />
     </div>
   );
