@@ -8,6 +8,13 @@ import ChatbotMessages from "./ChatbotMessages";
 import ChatbotInput from "./ChatbotInput";
 import ChatbotFinalCTA from "./ChatbotFinalCTA";
 
+// Declaração global para o Meta Pixel
+declare global {
+  interface Window {
+    fbq: (...args: any[]) => void;
+  }
+}
+
 // --- INTERFACES E TIPOS ---
 interface ChatbotProps {
   onClose: () => void;
@@ -414,6 +421,13 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           console.log("Resultado do envio de email:", emailResult);
           
           if (emailResult.success) {
+            // Disparar evento personalizado do Meta Pixel para conclusão do chatbot
+            if (window.fbq) {
+              window.fbq('trackCustom', 'ChatbotConcluidoLPS', {
+                site: window.location.hostname
+              });
+            }
+            
             toast.success("✅ Informações enviadas com sucesso! Em breve nosso consultor entrará em contato.");
           } else {
             throw new Error("Falha ao enviar e-mail");
@@ -428,6 +442,13 @@ export default function Chatbot({ onClose }: ChatbotProps) {
             sendEmail({ leadId: finalLeadId })
               .then(retryResult => {
                 if (retryResult.success) {
+                  // Disparar evento personalizado do Meta Pixel para conclusão do chatbot (segunda tentativa)
+                  if (window.fbq) {
+                    window.fbq('trackCustom', 'ChatbotConcluidoLPS', {
+                      site: window.location.hostname
+                    });
+                  }
+                  
                   toast.success("✅ E-mail enviado com sucesso na segunda tentativa!");
                 } else {
                   toast.error("❌ Não foi possível enviar o e-mail. Nossa equipe foi notificada e entrará em contato em breve.");
