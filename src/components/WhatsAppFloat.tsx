@@ -1,3 +1,9 @@
+declare global {
+  interface Window {
+    fbq: (...args: any[]) => void;
+  }
+}
+
 export default function WhatsAppFloat() {
   const whatsappNumber = "5581992998558"; // Número com código do país
   const message = encodeURIComponent(
@@ -7,6 +13,9 @@ export default function WhatsAppFloat() {
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
   const handleWhatsAppClick = () => {
+    if (window.fbq) {
+      window.fbq('track', 'Lead');
+    }
     window.open(whatsappUrl, '_blank');
   };
 
