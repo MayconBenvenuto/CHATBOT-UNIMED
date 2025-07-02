@@ -43,7 +43,7 @@ export default function WhatsAppFloat() {
 
   return (
     <div 
-      className="fixed bottom-6 right-6 z-50"
+      className="fixed bottom-6 right-6 z-40"
       data-component="whatsapp-float"
       data-tracking-element="contact-button"
     >
