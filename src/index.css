@@ -41,3 +41,31 @@ body {
 .auth-button {
   @apply w-full px-4 py-3 rounded bg-primary text-white font-semibold hover:bg-primary-hover transition-colors shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed;
 }
+
+/* WhatsApp Float Button - específico para tracking */
+.whatsapp-contact-button {
+  @apply bg-[#25D366] hover:bg-[#20c055] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110;
+}
+
+/* Facilita detecção por ferramentas de tracking */
+[data-track="whatsapp-contact"] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[data-track="whatsapp-contact"]:hover {
+  opacity: 0.9;
+}
+
+/* Screen reader only - para acessibilidade */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

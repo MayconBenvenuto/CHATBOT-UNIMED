@@ -13,8 +13,17 @@ export default function WhatsAppFloat() {
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
   const handleWhatsAppClick = () => {
+    // Track do Meta Pixel com parâmetros específicos
     if (window.fbq) {
-      window.fbq('track', 'Lead');
+      window.fbq('track', 'Lead', {
+        content_name: 'WhatsApp Contact Button',
+        content_category: 'contact',
+        source: 'whatsapp_float_button'
+      });
+      window.fbq('trackCustom', 'WhatsAppClick', {
+        button_location: 'floating',
+        contact_method: 'whatsapp'
+      });
     }
     window.open(whatsappUrl, '_blank');
   };
@@ -33,13 +42,30 @@ export default function WhatsAppFloat() {
   );
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div 
+      className="fixed bottom-6 right-6 z-50"
+      data-component="whatsapp-float"
+      data-tracking-element="contact-button"
+    >
       <button
         onClick={handleWhatsAppClick}
-        className="bg-[#25D366] hover:bg-[#20c055] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 group"
+        className="whatsapp-contact-button group"
         aria-label="Conversar no WhatsApp"
+        title="Fale conosco no WhatsApp"
+        type="button"
+        role="button"
+        tabIndex={0}
+        data-testid="whatsapp-float-button"
+        data-track="whatsapp-contact"
+        data-content-name="WhatsApp Contact Button"
+        data-contact-method="whatsapp"
+        data-button-type="contact"
+        data-fb-track="true"
       >
         <WhatsAppIcon />
+        
+        {/* Texto oculto para acessibilidade e tracking */}
+        <span className="sr-only">Contato via WhatsApp - Planos Empresariais Unimed</span>
         
         {/* Tooltip */}
         <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
