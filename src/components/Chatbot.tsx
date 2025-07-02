@@ -367,9 +367,13 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           console.log("Resultado do envio de email:", emailResult);
           
           if (emailResult.success) {
-            // Disparar evento personalizado do Meta Pixel para conclusão do chatbot
+            // Disparar evento personalizado do Meta Pixel para lead qualificado
             if (window.fbq) {
-              window.fbq('trackCustom', 'ChatbotConcluidoLPS', {
+              window.fbq('trackCustom', 'LeadQualificado', {
+                value: 50,
+                currency: 'BRL',
+                content_category: 'Lead Completo',
+                content_name: 'Chatbot Completed',
                 site: window.location.hostname
               });
             }
@@ -388,9 +392,13 @@ export default function Chatbot({ onClose }: ChatbotProps) {
             sendEmail({ leadId: finalLeadId })
               .then(retryResult => {
                 if (retryResult.success) {
-                  // Disparar evento personalizado do Meta Pixel para conclusão do chatbot (segunda tentativa)
+                  // Disparar evento personalizado do Meta Pixel para lead qualificado (segunda tentativa)
                   if (window.fbq) {
-                    window.fbq('trackCustom', 'ChatbotConcluidoLPS', {
+                    window.fbq('trackCustom', 'LeadQualificado', {
+                      value: 50,
+                      currency: 'BRL',
+                      content_category: 'Lead Completo',
+                      content_name: 'Chatbot Completed (Retry)',
                       site: window.location.hostname
                     });
                   }

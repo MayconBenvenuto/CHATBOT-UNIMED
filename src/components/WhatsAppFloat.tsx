@@ -13,16 +13,16 @@ export default function WhatsAppFloat() {
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
   const handleWhatsAppClick = () => {
-    // Track do Meta Pixel com parâmetros específicos
+    // Track do Meta Pixel com evento Contact 
     if (window.fbq) {
-      window.fbq('track', 'Lead', {
+      window.fbq('trackCustom', 'Contact', {
+        value: 1,
+        currency: 'BRL',
         content_name: 'WhatsApp Contact Button',
         content_category: 'contact',
-        source: 'whatsapp_float_button'
-      });
-      window.fbq('trackCustom', 'WhatsAppClick', {
         button_location: 'floating',
-        contact_method: 'whatsapp'
+        contact_method: 'whatsapp',
+        source: 'whatsapp_float_button'
       });
     }
     window.open(whatsappUrl, '_blank');
