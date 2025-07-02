@@ -71,10 +71,8 @@ export default function WhatsAppFloat() {
         <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
           Fale conosco no WhatsApp
           <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-800"></div>
-        </div>      </button>
-      
-      {/* Pulse animation */}
-      <div className="absolute inset-0 bg-[#25D366] rounded-full animate-ping opacity-20"></div>
+        </div>
+      </button>
     </div>
   );
 }
