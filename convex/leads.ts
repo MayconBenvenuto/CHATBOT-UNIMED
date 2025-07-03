@@ -29,6 +29,7 @@ export const updateLead = mutation({
     nomePlanoAtual: v.optional(v.string()),
     valorPlanoAtual: v.optional(v.string()),
     maiorDificuldade: v.optional(v.string()),
+    idadesBeneficiarios: v.optional(v.string()),
     status: v.optional(v.string()),
     dadosEmpresa: v.optional(v.any()),
   },

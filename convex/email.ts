@@ -140,6 +140,12 @@ export const sendLeadEmail = action({
               ${dadosEmpresaHtml}
               
               <div class="section">
+                <h3>👨‍👩‍👧‍👦 Beneficiários para Cotação</h3>
+                ${lead.idadesBeneficiarios ? `<div class="info-item"><strong>Idades dos Beneficiários:</strong> ${lead.idadesBeneficiarios}</div>` : ""}
+                ${lead.idadesBeneficiarios ? `<div class="info-item"><strong>Total de Beneficiários:</strong> ${lead.idadesBeneficiarios.split(',').length} pessoa(s)</div>` : ""}
+              </div>
+              
+              <div class="section">
                 <h3>🏥 Situação do Plano de Saúde</h3>
                 <div class="info-item"><strong>Possui Plano Atual:</strong> ${lead.temPlanoAtual ? "✅ SIM" : "❌ NÃO"}</div>
                 ${lead.nomePlanoAtual ? `<div class="info-item"><strong>Operadora Atual:</strong> ${lead.nomePlanoAtual}</div>` : ""}

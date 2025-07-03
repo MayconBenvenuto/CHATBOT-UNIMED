@@ -15,6 +15,7 @@ const applicationTables = {
     nomePlanoAtual: v.optional(v.string()),
     valorPlanoAtual: v.optional(v.string()),
     maiorDificuldade: v.optional(v.string()),
+    idadesBeneficiarios: v.optional(v.string()),
     status: v.string(), // "em_andamento", "completo", "enviado"
     
     // --- MUDANÇA AQUI ---
