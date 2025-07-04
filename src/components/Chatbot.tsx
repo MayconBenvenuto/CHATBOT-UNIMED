@@ -44,6 +44,8 @@ interface ChatData {
   valorPlanoAtual: string;
   maiorDificuldade: string;
   idadesBeneficiarios: string;
+  cidade?: string;
+  estado?: string;
 }
 
 interface Message {
@@ -67,7 +69,8 @@ type ChatAction =
   | { type: "SET_IS_TYPING"; payload: boolean }
   | { type: "ADD_MESSAGE"; payload: Message }
   | { type: "SET_LEAD_ID"; payload: Id<"leads"> }
-  | { type: "PROCEED_STEP"; payload: { nextStep: ChatStep; newData: Partial<ChatData> } };
+  | { type: "PROCEED_STEP"; payload: { nextStep: ChatStep; newData: Partial<ChatData> } }
+  | { type: "SET_LOCATION"; payload: { cidade: string; estado: string } };
 
 const initialState: ChatState = {
   step: "nome",
@@ -99,6 +102,15 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         step: action.payload.nextStep,
         chatData: action.payload.newData,
         input: "",
+      };
+    case "SET_LOCATION":
+      return {
+        ...state,
+        chatData: {
+          ...state.chatData,
+          cidade: action.payload.cidade,
+          estado: action.payload.estado,
+        },
       };
     default:
       return state;
@@ -139,6 +151,30 @@ export default function Chatbot({ onClose }: ChatbotProps) {
     setTimeout(() => {
       addBotMessage("Para começar, qual é o seu nome? 😊");
     }, 1000);
+
+    const fetchLocation = async () => {
+      try {
+        const response = await fetch("https://ipapi.co/json/");
+        if (!response.ok) {
+          throw new Error("Falha ao buscar localização");
+        }
+        const data = await response.json();
+        const { city, region_code } = data;
+        if (city && region_code) {
+          dispatch({ type: "SET_LOCATION", payload: { cidade: city, estado: region_code } });
+          if (window.fbq) {
+            window.fbq("track", "FindLocation", {
+              city: city,
+              region: region_code,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao buscar localização:", error);
+      }
+    };
+
+    void fetchLocation();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -331,7 +367,10 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           nomePlanoAtual: newData.nomePlanoAtual,
           valorPlanoAtual: newData.valorPlanoAtual,
           maiorDificuldade: newData.maiorDificuldade,
-          status: step === "dificuldade" ? "completo" : "em_andamento",
+          idadesBeneficiarios: newData.idadesBeneficiarios,
+          cidade: newData.cidade,
+          estado: newData.estado,
+          status: step === "numero_cnpj" ? "completo" : "em_andamento",
         });
         
         await updateLead({
@@ -344,7 +383,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           valorPlanoAtual: newData.valorPlanoAtual,
           maiorDificuldade: newData.maiorDificuldade,
           idadesBeneficiarios: newData.idadesBeneficiarios,
-          status: step === "idades_beneficiarios" ? "completo" : "em_andamento",
+          cidade: newData.cidade,
+          estado: newData.estado,
+          status: step === "numero_cnpj" ? "completo" : "em_andamento",
         });
       }
     } catch (error) {
@@ -367,6 +408,8 @@ export default function Chatbot({ onClose }: ChatbotProps) {
           valorPlanoAtual: newData.valorPlanoAtual,
           maiorDificuldade: newData.maiorDificuldade,
           idadesBeneficiarios: newData.idadesBeneficiarios,
+          cidade: newData.cidade,
+          estado: newData.estado,
         });
         
         // Adicionamos um pequeno delay para garantir que a atualização foi concluída

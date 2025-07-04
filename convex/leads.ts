@@ -32,6 +32,8 @@ export const updateLead = mutation({
     idadesBeneficiarios: v.optional(v.string()),
     status: v.optional(v.string()),
     dadosEmpresa: v.optional(v.any()),
+    cidade: v.optional(v.string()),
+    estado: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { leadId, ...updates } = args;

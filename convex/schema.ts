@@ -22,6 +22,8 @@ const applicationTables = {
     // Adicionamos um campo para armazenar os dados da empresa validados pela API.
     // Usamos v.any() por simplicidade, pois a resposta da API pode ter muitos campos.
     dadosEmpresa: v.optional(v.any()),
+    cidade: v.optional(v.string()),
+    estado: v.optional(v.string()),
   })
   // Sugestão: Adicione índices para consultas futuras
   // .index('by_email', ['email'])
