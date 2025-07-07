@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef } from "react";
 import { useAction, useMutation } from "convex/react";
-import { toast } from "sonner";
+import { toast } from "sonner"; // Importando o toast
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import ChatbotHeader from "./ChatbotHeader";
@@ -138,6 +138,23 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       inputRef.current.focus();
     }
   }, [messages]);
+
+  // Efeito para enviar e-mail de "lead morno" se o usuário fechar o chat
+  useEffect(() => {
+    // A função retornada pelo useEffect é executada quando o componente é desmontado
+    return () => {
+      // Verifica se temos um leadId, nome, whatsapp e se o chat não foi finalizado
+      if (leadId && chatData.nome && chatData.whatsapp && step !== "finalizado") {
+        console.log(`[Chatbot Unload] Enviando lead morno: ${leadId}`);
+        
+        // Dispara o e-mail sem esperar pela conclusão para não bloquear o fechamento
+        sendEmail({ leadId, isWarmLead: true }).catch(error => {
+          console.error("Erro ao enviar lead morno no fechamento:", error);
+        });
+      }
+    };
+    // Adicionamos as dependências para que o hook sempre tenha os dados mais recentes
+  }, [leadId, chatData.nome, chatData.whatsapp, step, sendEmail]);
 
   const addBotMessage = (text: string, options?: string[]) => {
     dispatch({ type: "SET_IS_TYPING", payload: true });
@@ -528,7 +545,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
             isTyping={isTyping}
             inputRef={inputRef as React.RefObject<HTMLInputElement>}
             handleInputChange={handleInputChange}
-            handleSubmit={handleSubmit as (e: React.FormEvent) => void}
+            handleSubmit={(e) => { void handleSubmit(e); }}
             handleSkip={handleSkip}
             getInputPlaceholder={getInputPlaceholder as (step: string) => string}
           />
