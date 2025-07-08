@@ -179,10 +179,11 @@ export default function Chatbot({ onClose }: ChatbotProps) {
         const { city, region_code } = data;
         if (city && region_code) {
           dispatch({ type: "SET_LOCATION", payload: { cidade: city, estado: region_code } });
+          // Removido envio de city/region para o Meta Pixel para evitar violação de privacidade
           if (window.fbq) {
             window.fbq("track", "FindLocation", {
-              city: city,
-              region: region_code,
+              content_name: "Location Detected",
+              content_category: "geolocation"
             });
           }
         }
@@ -446,9 +447,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
               window.fbq('trackCustom', 'LeadQualificado', {
                 value: 50,
                 currency: 'BRL',
-                content_category: 'Lead Completo',
-                content_name: 'Chatbot Completed',
-                site: window.location.hostname
+                content_category: 'Lead',
+                content_name: 'Chatbot',
+                source: 'landing_page'
               });
             }
             
@@ -471,9 +472,9 @@ export default function Chatbot({ onClose }: ChatbotProps) {
                     window.fbq('trackCustom', 'LeadQualificado', {
                       value: 50,
                       currency: 'BRL',
-                      content_category: 'Lead Completo',
-                      content_name: 'Chatbot Completed (Retry)',
-                      site: window.location.hostname
+                      content_category: 'Lead',
+                      content_name: 'Chatbot',
+                      source: 'landing_page'
                     });
                   }
                   
