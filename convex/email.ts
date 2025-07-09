@@ -112,7 +112,7 @@ export const sendLeadEmail = action({
             <style>
               body { font-family: Arial, sans-serif; background-color: #f0f8ff; }
               .container { max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border: 1px solid #ddd; border-radius: 8px; }
-              .header { background-color: #1e90ff; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }
+              .header { background-color: #0e7a0d; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }
               .warning { background-color: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin: 20px 0; border-radius: 5px; }
               .info-item { margin-bottom: 10px; }
               .whatsapp-button { background-color: #25D366; color: white; padding: 8px 12px; text-decoration: none; border-radius: 5px; font-weight: bold; }
