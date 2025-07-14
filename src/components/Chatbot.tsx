@@ -127,6 +127,22 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   const createLead = useMutation(api.leads.createLead);
   const updateLead = useMutation(api.leads.updateLead);
   const sendEmail = useAction(api.email.sendLeadEmail);
+
+  // Função para enviar lead morno quando o chatbot for fechado
+  const handleClose = () => {
+    // Só envia o lead morno se há um lead, nome, whatsapp e não foi finalizado
+    if (leadId && chatData.nome && chatData.whatsapp && step !== "finalizado") {
+      console.log(`[Chatbot Close] Enviando lead morno: ${leadId}`);
+      
+      // Dispara o e-mail sem esperar pela conclusão
+      sendEmail({ leadId, isWarmLead: true }).catch(error => {
+        console.error("Erro ao enviar lead morno no fechamento:", error);
+      });
+    }
+    
+    // Chama a função de fechamento original
+    onClose();
+  };
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -138,23 +154,6 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       inputRef.current.focus();
     }
   }, [messages]);
-
-  // Efeito para enviar e-mail de "lead morno" se o usuário fechar o chat
-  useEffect(() => {
-    // A função retornada pelo useEffect é executada quando o componente é desmontado
-    return () => {
-      // Verifica se temos um leadId, nome, whatsapp e se o chat não foi finalizado
-      if (leadId && chatData.nome && chatData.whatsapp && step !== "finalizado") {
-        console.log(`[Chatbot Unload] Enviando lead morno: ${leadId}`);
-        
-        // Dispara o e-mail sem esperar pela conclusão para não bloquear o fechamento
-        sendEmail({ leadId, isWarmLead: true }).catch(error => {
-          console.error("Erro ao enviar lead morno no fechamento:", error);
-        });
-      }
-    };
-    // Adicionamos as dependências para que o hook sempre tenha os dados mais recentes
-  }, [leadId, chatData.nome, chatData.whatsapp, step, sendEmail]);
 
   const addBotMessage = (text: string, options?: string[]) => {
     dispatch({ type: "SET_IS_TYPING", payload: true });
@@ -529,7 +528,7 @@ export default function Chatbot({ onClose }: ChatbotProps) {
       <div className="bg-white rounded-2xl w-full max-w-xs sm:max-w-sm md:max-w-md h-[70vh] max-h-[90vh] flex flex-col shadow-2xl fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 transition-all duration-300"
         style={{width: '100%', maxWidth: '350px'}}>
         {/* Header */}
-        <ChatbotHeader onClose={onClose} progress={getProgressPercentage()} />
+        <ChatbotHeader onClose={handleClose} progress={getProgressPercentage()} />
         <ChatbotMessages
           messages={messages}
           step={step as string}
