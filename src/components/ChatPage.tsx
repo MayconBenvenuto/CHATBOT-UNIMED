@@ -13,7 +13,7 @@ interface ChatPageProps {
 export default function ChatPage({ onBack }: ChatPageProps) {
   const [isChatbotOpen, setIsChatbotOpen] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
-  const [hasConsent, setHasConsent] = useState(false);
+  const [_hasConsent, setHasConsent] = useState(false);
   const [showCookieConsent, setShowCookieConsent] = useState(false);
 
   // Função para carregar o Facebook Pixel
