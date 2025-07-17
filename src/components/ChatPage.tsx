@@ -103,7 +103,7 @@ export default function ChatPage({ onBack }: ChatPageProps) {
               {/* Informações do Assistente */}
               <div className="flex-1 min-w-0">
                 <h1 className="text-lg font-semibold text-white truncate">
-                  Lucas Silva
+                  Davi Silva
                 </h1>
                 <p className="text-sm text-green-100 flex items-center">
                   {isTyping ? (
