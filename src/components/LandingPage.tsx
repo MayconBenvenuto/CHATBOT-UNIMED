@@ -7,9 +7,11 @@ import { CheckCircle } from "lucide-react";
 
 interface LandingPageProps {
   onOpenChatbot: () => void;
+  trackEvent?: (eventName: string, parameters?: any) => void;
+  trackCustomEvent?: (eventName: string, parameters?: any) => void;
 }
 
-export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
+export default function LandingPage({ onOpenChatbot, trackEvent, trackCustomEvent }: LandingPageProps) {
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -52,13 +54,29 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
-                  onClick={onOpenChatbot}
+                  onClick={() => {
+                    trackEvent?.('Lead', {
+                      value: 10,
+                      currency: 'BRL',
+                      content_name: 'Solicitar Cotação Gratuita',
+                      content_category: 'cta_button',
+                      source: 'hero_section'
+                    });
+                    onOpenChatbot();
+                  }}
                   className="bg-white text-unimed-green px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-base sm:text-lg"
                 >
                   Solicitar Cotação Gratuita
                 </button>
                 <button
-                  onClick={onOpenChatbot}
+                  onClick={() => {
+                    trackCustomEvent?.('ViewContent', {
+                      content_name: 'Saiba Mais Button',
+                      content_category: 'information',
+                      source: 'hero_section'
+                    });
+                    onOpenChatbot();
+                  }}
                   className="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-white hover:text-unimed-green transition-colors font-semibold text-base sm:text-lg"
                 >
                   Saiba Mais
@@ -102,7 +120,16 @@ export default function LandingPage({ onOpenChatbot }: LandingPageProps) {
       <TestimonialsSection />
 
       {/* CTA Section */}
-      <CTASection onOpenChatbot={onOpenChatbot} />
+      <CTASection onOpenChatbot={() => {
+        trackEvent?.('Lead', {
+          value: 15,
+          currency: 'BRL',
+          content_name: 'CTA Section',
+          content_category: 'cta_button',
+          source: 'bottom_cta'
+        });
+        onOpenChatbot();
+      }} />
 
       {/* Footer */}
       <Footer />

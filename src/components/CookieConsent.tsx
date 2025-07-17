@@ -1,42 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useCookieConsent } from "../hooks/useFacebookPixel";
 import { Shield, X, Settings } from 'lucide-react';
+import { useState } from 'react';
 
-interface CookieConsentProps {
-  onAccept: () => void;
-  onReject: () => void;
-}
-
-export default function CookieConsent({ onAccept, onReject }: CookieConsentProps) {
-  const [isVisible, setIsVisible] = useState(false);
+export default function CookieConsent() {
+  const { showConsent, acceptCookies, rejectCookies } = useCookieConsent();
   const [showDetails, setShowDetails] = useState(false);
-
-  useEffect(() => {
-    // Verifica se já há consentimento salvo
-    const consent = localStorage.getItem('cookie-consent');
-    if (!consent) {
-      setIsVisible(true);
-    } else if (consent === 'accepted') {
-      onAccept();
-    }
-  }, [onAccept]);
-
-  const handleAccept = () => {
-    localStorage.setItem('cookie-consent', 'accepted');
-    setIsVisible(false);
-    onAccept();
-  };
-
-  const handleReject = () => {
-    localStorage.setItem('cookie-consent', 'rejected');
-    setIsVisible(false);
-    onReject();
-  };
 
   const handleSettings = () => {
     setShowDetails(!showDetails);
   };
 
-  if (!isVisible) return null;
+  if (!showConsent) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg">
@@ -51,10 +25,9 @@ export default function CookieConsent({ onAccept, onReject }: CookieConsentProps
             </div>
             
             <p className="text-sm text-gray-600 mb-3">
-              Utilizamos cookies e tecnologias similares para melhorar sua experiência, 
-              personalizar conteúdo e analisar o tráfego do site. Alguns cookies são essenciais 
-              para o funcionamento do site, enquanto outros nos ajudam a entender como você 
-              interage com nossos serviços.
+              🍪 Este site usa cookies para melhorar sua experiência e para análises de marketing. 
+              Utilizamos o Facebook Pixel para medir a eficácia de nossos anúncios e entender como você 
+              interage com nossos serviços. Ao continuar navegando, você concorda com nossa política de privacidade.
             </p>
 
             {showDetails && (
@@ -73,14 +46,14 @@ export default function CookieConsent({ onAccept, onReject }: CookieConsentProps
 
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={handleAccept}
+                onClick={acceptCookies}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
               >
                 Aceitar Todos
               </button>
               
               <button
-                onClick={handleReject}
+                onClick={rejectCookies}
                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors text-sm font-medium"
               >
                 Rejeitar Opcionais
@@ -97,7 +70,7 @@ export default function CookieConsent({ onAccept, onReject }: CookieConsentProps
           </div>
           
           <button
-            onClick={handleReject}
+            onClick={rejectCookies}
             className="p-1 text-gray-400 hover:text-gray-600"
             aria-label="Fechar"
           >

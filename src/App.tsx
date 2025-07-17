@@ -5,36 +5,41 @@ import LandingPage from "./components/LandingPage";
 import Chatbot from "./components/Chatbot";
 import ChatPage from "./components/ChatPage";
 import WhatsAppFloat from "./components/WhatsAppFloat";
-
-declare global {
-  interface Window {
-    fbq: (...args: any[]) => void;
-  }
-}
+import CookieConsent from "./components/CookieConsent";
+import { useFacebookPixel, useCookieConsent } from "./hooks/useFacebookPixel";
 
 export default function App() {
+  const { hasConsent } = useCookieConsent();
+  const { trackEvent, trackCustomEvent } = useFacebookPixel(hasConsent);
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/chat" element={<ChatPageRoute />} />
+        <Route path="/" element={<HomePage trackEvent={trackEvent} trackCustomEvent={trackCustomEvent} />} />
+        <Route path="/chat" element={<ChatPageRoute trackEvent={trackEvent} trackCustomEvent={trackCustomEvent} />} />
       </Routes>
       <Toaster position="top-right" />
+      <CookieConsent />
     </Router>
   );
 }
 
-function HomePage() {
+interface PageProps {
+  trackEvent: (eventName: string, parameters?: any) => void;
+  trackCustomEvent: (eventName: string, parameters?: any) => void;
+}
+
+function HomePage({ trackEvent, trackCustomEvent }: PageProps) {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const navigate = useNavigate();
 
   // Detectar localização do usuário quando o componente carrega
   useEffect(() => {
-    if (navigator.geolocation && window.fbq) {
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           // Sucesso na obtenção da localização
-          window.fbq('trackCustom', 'FindLocation', {
+          trackCustomEvent('FindLocation', {
             content_name: 'User Location Found',
             content_category: 'geolocation',
             latitude: position.coords.latitude,
@@ -44,7 +49,7 @@ function HomePage() {
         },
         (error) => {
           // Erro ou usuário negou permissão
-          window.fbq('trackCustom', 'FindLocation', {
+          trackCustomEvent('FindLocation', {
             content_name: 'Location Permission Denied',
             content_category: 'geolocation',
             error: error.message,
@@ -57,19 +62,17 @@ function HomePage() {
         }
       );
     }
-  }, []);
+  }, [trackCustomEvent]);
 
   const handleOpenChatbot = () => {
     // Disparar evento Lead quando o chatbot é aberto
-    if (window.fbq) {
-      window.fbq('trackCustom', 'Lead', {
-        value: 10,
-        currency: 'BRL',
-        content_name: 'Chatbot Open',
-        content_category: 'interaction',
-        source: 'landing_page_button'
-      });
-    }
+    trackEvent('Lead', {
+      value: 10,
+      currency: 'BRL',
+      content_name: 'Chatbot Open',
+      content_category: 'interaction',
+      source: 'landing_page_button'
+    });
     
     // Navegar para a página de chat
     void navigate('/chat');
@@ -77,21 +80,21 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <LandingPage onOpenChatbot={handleOpenChatbot} />
+      <LandingPage onOpenChatbot={handleOpenChatbot} trackEvent={trackEvent} trackCustomEvent={trackCustomEvent} />
       {isChatbotOpen && (
         <Chatbot onClose={() => setIsChatbotOpen(false)} />
       )}
-      <WhatsAppFloat />
+      <WhatsAppFloat trackEvent={trackEvent} trackCustomEvent={trackCustomEvent} />
     </div>
   );
 }
 
-function ChatPageRoute() {
+function ChatPageRoute({ trackEvent, trackCustomEvent }: PageProps) {
   const navigate = useNavigate();
 
   const handleBack = () => {
     void navigate('/');
   };
 
-  return <ChatPage onBack={handleBack} />;
+  return <ChatPage onBack={handleBack} trackEvent={trackEvent} trackCustomEvent={trackCustomEvent} />;
 }

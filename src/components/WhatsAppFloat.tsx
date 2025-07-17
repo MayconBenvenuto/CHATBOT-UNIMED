@@ -1,10 +1,9 @@
-declare global {
-  interface Window {
-    fbq: (...args: any[]) => void;
-  }
+interface WhatsAppFloatProps {
+  trackEvent?: (eventName: string, parameters?: any) => void;
+  trackCustomEvent?: (eventName: string, parameters?: any) => void;
 }
 
-export default function WhatsAppFloat() {
+export default function WhatsAppFloat({ trackEvent, trackCustomEvent }: WhatsAppFloatProps) {
   const whatsappNumber = "5581992998558"; // Número com código do país
   const message = encodeURIComponent(
     "Olá! Tenho interesse em conhecer os planos de saúde empresariais da Unimed. Gostaria de receber uma cotação personalizada."
@@ -14,17 +13,21 @@ export default function WhatsAppFloat() {
 
   const handleWhatsAppClick = () => {
     // Track do Meta Pixel com evento Contact 
-    if (window.fbq) {
-      window.fbq('trackCustom', 'Contact', {
-        value: 1,
-        currency: 'BRL',
-        content_name: 'WhatsApp Contact Button',
-        content_category: 'contact',
-        button_location: 'floating',
-        contact_method: 'whatsapp',
-        source: 'whatsapp_float_button'
-      });
-    }
+    trackEvent?.('Contact', {
+      method: 'whatsapp',
+      content_name: 'WhatsApp Button'
+    });
+    
+    trackCustomEvent?.('WhatsAppClick', {
+      value: 1,
+      currency: 'BRL',
+      content_name: 'WhatsApp Contact Button',
+      content_category: 'contact',
+      button_location: 'floating',
+      contact_method: 'whatsapp',
+      source: 'whatsapp_float_button'
+    });
+    
     window.open(whatsappUrl, '_blank');
   };
 

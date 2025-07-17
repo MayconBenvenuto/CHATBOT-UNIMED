@@ -1,70 +1,30 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Phone, Video, MoreVertical, Shield } from "lucide-react";
 import Chatbot from "./Chatbot";
-import CookieConsent from "./CookieConsent";
-
-// ID do Facebook Pixel
-const PIXEL_ID = "3691586260972816";
 
 interface ChatPageProps {
   onBack: () => void;
+  trackEvent?: (eventName: string, parameters?: any) => void;
+  trackCustomEvent?: (eventName: string, parameters?: any) => void;
 }
 
-export default function ChatPage({ onBack }: ChatPageProps) {
+export default function ChatPage({ onBack, trackEvent, trackCustomEvent: _trackCustomEvent }: ChatPageProps) {
   const [isChatbotOpen, setIsChatbotOpen] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
-  const [_hasConsent, setHasConsent] = useState(false);
-  const [showCookieConsent, setShowCookieConsent] = useState(false);
-
-  // Função para carregar o Facebook Pixel
-  const loadFacebookPixel = () => {
-    if (!(window as any).fbq) {
-      // Cria o script do pixel
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-      document.head.appendChild(script);
-
-      // Inicializa o fbq
-      (window as any).fbq = function (...args: any[]) {
-        ((window as any).fbq.q = (window as any).fbq.q || []).push(args);
-      };
-      (window as any).fbq.l = +new Date();
-      (window as any).fbq('init', PIXEL_ID);
-      (window as any).fbq('track', 'PageView');
-    } else {
-      (window as any).fbq('track', 'PageView');
-    }
-  };
-
-  // Funções de consentimento
-  const handleAcceptCookies = () => {
-    setHasConsent(true);
-    setShowCookieConsent(false);
-    loadFacebookPixel();
-  };
-
-  const handleRejectCookies = () => {
-    setShowCookieConsent(false);
-    loadFacebookPixel()
-    // Não carrega o pixel se rejeitado
-  };
 
   const handleCloseChatbot = () => {
     setIsChatbotOpen(false);
     onBack();
   };
 
-  // Verificar consentimento ao carregar
+  // Track página do chat quando carrega
   useEffect(() => {
-    const consent = localStorage.getItem('cookie-consent');
-    if (consent === 'accepted') {
-      setHasConsent(true);
-      loadFacebookPixel();
-    } else if (!consent) {
-      setShowCookieConsent(true);
-    }
-  }, []);
+    trackEvent?.('ViewContent', {
+      content_name: 'Chat Page',
+      content_category: 'chat',
+      source: 'chat_page_load'
+    });
+  }, [trackEvent]);
 
   // Simular typing indicator ao carregar
   useEffect(() => {
@@ -171,14 +131,6 @@ export default function ChatPage({ onBack }: ChatPageProps) {
           Suas informações estão protegidas pela LGPD
         </p>
       </div>
-
-      {/* Banner de Consentimento de Cookies */}
-      {showCookieConsent && (
-        <CookieConsent 
-          onAccept={handleAcceptCookies}
-          onReject={handleRejectCookies}
-        />
-      )}
     </div>
   );
 }
