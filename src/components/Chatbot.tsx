@@ -18,6 +18,7 @@ declare global {
 // --- INTERFACES E TIPOS ---
 interface ChatbotProps {
   onClose: () => void;
+  fullPage?: boolean;
 }
 
 type ChatStep =
@@ -117,7 +118,7 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
   }
 }
 
-export default function Chatbot({ onClose }: ChatbotProps) {
+export default function Chatbot({ onClose, fullPage = false }: ChatbotProps) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
   const { step, input, leadId, chatData, messages, isTyping } = state;
 
@@ -524,11 +525,17 @@ export default function Chatbot({ onClose }: ChatbotProps) {
   };
   
     return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-xs sm:max-w-sm md:max-w-md h-[70vh] max-h-[90vh] flex flex-col shadow-2xl fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 transition-all duration-300"
-        style={{width: '100%', maxWidth: '350px'}}>
+    <div className={fullPage 
+      ? "h-full bg-white flex flex-col" 
+      : "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    }>
+      <div className={fullPage 
+        ? "h-full flex flex-col" 
+        : "bg-white rounded-2xl w-full max-w-xs sm:max-w-sm md:max-w-md h-[70vh] max-h-[90vh] flex flex-col shadow-2xl fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 transition-all duration-300"
+      }
+        style={!fullPage ? {width: '100%', maxWidth: '350px'} : {}}>
         {/* Header */}
-        <ChatbotHeader onClose={handleClose} progress={getProgressPercentage()} />
+        {!fullPage && <ChatbotHeader onClose={handleClose} progress={getProgressPercentage()} />}
         <ChatbotMessages
           messages={messages}
           step={step as string}

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import LandingPage from "./components/LandingPage";
 import Chatbot from "./components/Chatbot";
+import ChatPage from "./components/ChatPage";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 
 declare global {
@@ -11,7 +13,20 @@ declare global {
 }
 
 export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/chat" element={<ChatPageRoute />} />
+      </Routes>
+      <Toaster position="top-right" />
+    </Router>
+  );
+}
+
+function HomePage() {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Detectar localização do usuário quando o componente carrega
   useEffect(() => {
@@ -55,7 +70,9 @@ export default function App() {
         source: 'landing_page_button'
       });
     }
-    setIsChatbotOpen(true);
+    
+    // Navegar para a página de chat
+    void navigate('/chat');
   };
 
   return (
@@ -65,7 +82,16 @@ export default function App() {
         <Chatbot onClose={() => setIsChatbotOpen(false)} />
       )}
       <WhatsAppFloat />
-      <Toaster />
     </div>
   );
+}
+
+function ChatPageRoute() {
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    void navigate('/');
+  };
+
+  return <ChatPage onBack={handleBack} />;
 }
