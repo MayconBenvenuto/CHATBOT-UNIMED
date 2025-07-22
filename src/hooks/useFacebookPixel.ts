@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 // 🆔 CONFIGURAÇÃO: Pixel ID da Unimed
-const PIXEL_ID = "1648153312538580";
+const PIXEL_ID = "3691586260972816";
 
 //  Interface do Hook
 interface FacebookPixelHook {
