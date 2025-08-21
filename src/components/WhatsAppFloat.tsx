@@ -1,9 +1,4 @@
-interface WhatsAppFloatProps {
-  trackEvent?: (eventName: string, parameters?: any) => void;
-  trackCustomEvent?: (eventName: string, parameters?: any) => void;
-}
-
-export default function WhatsAppFloat({ trackEvent, trackCustomEvent }: WhatsAppFloatProps) {
+export default function WhatsAppFloat() {
   const whatsappNumber = "5581992998558"; // Número com código do país
   const message = encodeURIComponent(
     "Olá! Tenho interesse em conhecer os planos de saúde empresariais da Unimed. Gostaria de receber uma cotação personalizada."
@@ -12,22 +7,6 @@ export default function WhatsAppFloat({ trackEvent, trackCustomEvent }: WhatsApp
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
   const handleWhatsAppClick = () => {
-    // Track do Meta Pixel com evento Contact 
-    trackEvent?.('Contact', {
-      method: 'whatsapp',
-      content_name: 'WhatsApp Button'
-    });
-    
-    trackCustomEvent?.('WhatsAppClick', {
-      value: 1,
-      currency: 'BRL',
-      content_name: 'WhatsApp Contact Button',
-      content_category: 'contact',
-      button_location: 'floating',
-      contact_method: 'whatsapp',
-      source: 'whatsapp_float_button'
-    });
-    
     window.open(whatsappUrl, '_blank');
   };
 
@@ -63,7 +42,7 @@ export default function WhatsAppFloat({ trackEvent, trackCustomEvent }: WhatsApp
         data-content-name="WhatsApp Contact Button"
         data-contact-method="whatsapp"
         data-button-type="contact"
-        data-fb-track="true"
+  data-fb-track="false"
       >
         <WhatsAppIcon />
         

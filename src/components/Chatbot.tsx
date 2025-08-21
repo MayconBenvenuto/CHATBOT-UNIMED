@@ -8,13 +8,6 @@ import ChatbotMessages from "./ChatbotMessages";
 import ChatbotInput from "./ChatbotInput";
 import ChatbotFinalCTA from "./ChatbotFinalCTA";
 
-// Declaração global para o Meta Pixel
-declare global {
-  interface Window {
-    fbq: (...args: any[]) => void;
-  }
-}
-
 // --- INTERFACES E TIPOS ---
 interface ChatbotProps {
   onClose: () => void;
@@ -179,13 +172,7 @@ export default function Chatbot({ onClose, fullPage = false }: ChatbotProps) {
         const { city, region_code } = data;
         if (city && region_code) {
           dispatch({ type: "SET_LOCATION", payload: { cidade: city, estado: region_code } });
-          // Removido envio de city/region para o Meta Pixel para evitar violação de privacidade
-          if (window.fbq) {
-            window.fbq("track", "FindLocation", {
-              content_name: "Location Detected",
-              content_category: "geolocation"
-            });
-          }
+          // Tracking via Facebook Pixel removido
         }
       } catch (error) {
         console.error("Erro ao buscar localização:", error);
@@ -442,16 +429,7 @@ export default function Chatbot({ onClose, fullPage = false }: ChatbotProps) {
           console.log("Resultado do envio de email:", emailResult);
           
           if (emailResult.success) {
-            // Disparar evento personalizado do Meta Pixel para lead qualificado
-            if (window.fbq) {
-              window.fbq('trackCustom', 'LeadQualificado', {
-                value: 50,
-                currency: 'BRL',
-                content_category: 'Lead',
-                content_name: 'Chatbot',
-                source: 'landing_page'
-              });
-            }
+            // Tracking via Facebook Pixel removido
             
             toast.success("✅ Informações enviadas com sucesso! Em breve nosso consultor entrará em contato.");
           } else {
@@ -467,16 +445,7 @@ export default function Chatbot({ onClose, fullPage = false }: ChatbotProps) {
             sendEmail({ leadId: finalLeadId })
               .then(retryResult => {
                 if (retryResult.success) {
-                  // Disparar evento personalizado do Meta Pixel para lead qualificado (segunda tentativa)
-                  if (window.fbq) {
-                    window.fbq('trackCustom', 'LeadQualificado', {
-                      value: 50,
-                      currency: 'BRL',
-                      content_category: 'Lead',
-                      content_name: 'Chatbot',
-                      source: 'landing_page'
-                    });
-                  }
+                  // Tracking via Facebook Pixel removido
                   
                   toast.success("✅ E-mail enviado com sucesso na segunda tentativa!");
                 } else {

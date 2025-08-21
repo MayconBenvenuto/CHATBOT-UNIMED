@@ -4,11 +4,9 @@ import Chatbot from "./Chatbot";
 
 interface ChatPageProps {
   onBack: () => void;
-  trackEvent?: (eventName: string, parameters?: any) => void;
-  trackCustomEvent?: (eventName: string, parameters?: any) => void;
 }
 
-export default function ChatPage({ onBack, trackEvent, trackCustomEvent: _trackCustomEvent }: ChatPageProps) {
+export default function ChatPage({ onBack }: ChatPageProps) {
   const [isChatbotOpen, setIsChatbotOpen] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
 
@@ -17,14 +15,10 @@ export default function ChatPage({ onBack, trackEvent, trackCustomEvent: _trackC
     onBack();
   };
 
-  // Track página do chat quando carrega
+  // Tracking removido
   useEffect(() => {
-    trackEvent?.('ViewContent', {
-      content_name: 'Chat Page',
-      content_category: 'chat',
-      source: 'chat_page_load'
-    });
-  }, [trackEvent]);
+    // noop
+  }, []);
 
   // Simular typing indicator ao carregar
   useEffect(() => {
