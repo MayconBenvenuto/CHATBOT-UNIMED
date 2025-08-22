@@ -1,27 +1,66 @@
-# Logs
+##############################
+# Base Node / JS Artefacts   #
+##############################
+node_modules
+dist
+dist-ssr
+coverage
+
+##############################
+# Logs                       #
+##############################
 logs
 *.log
+*.log.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+##############################
+# Caches / Build Metadata    #
+##############################
+*.tsbuildinfo
+.eslintcache
+.turbo
+.parcel-cache
+.vite
+.cache
+.pnp.*
+.npm
+.yarn-integrity
+.tailwindcss-cache
 
-# Editor directories and files
+##############################
+# Environment Files          #
+##############################
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+
+##############################
+# OS / Editor Artefacts      #
+##############################
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.env
-# Ignored for the template, you probably want to remove it:
-package-lock.json
+
+##############################
+# Misc                       #
+##############################
+# Deixe o lock file versionado para builds determinísticas
+# (removido das regras de ignore)
+# package-lock.json
+
+.github/

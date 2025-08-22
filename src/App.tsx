@@ -6,11 +6,12 @@ import Chatbot from "./components/Chatbot";
 import ChatPage from "./components/ChatPage";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 import CookieConsent from "./components/CookieConsent";
-import { useCookieConsent } from "./hooks/useFacebookPixel";
+import { useCookieConsent, useFacebookPixel } from "./hooks/useFacebookPixel";
 
 export default function App() {
-  // Mantém o banner de consentimento funcionando
-  useCookieConsent();
+  // Consentimento e inicialização do Pixel
+  const { hasConsent } = useCookieConsent();
+  useFacebookPixel(hasConsent);
 
   return (
     <Router>
